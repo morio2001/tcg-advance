@@ -22,7 +22,7 @@ export default function App() {
   const [tournamentEvent, setTournamentEvent] = useState<TcgEvent | null>(null);
   const [selUserId, setSelUserId] = useState<string | null>(null);
   const [following, setFollowing] = useState<string[]>(MOCK_FOLLOWING_IDS);
-  const [kudosedPosts, setKudosedPosts] = useState<Record<string, boolean>>({});
+  const [ggPosts, setGgPosts] = useState<Record<string, boolean>>({});
 
   const nav = (v: ViewId, data?: any) => {
     setView(v);
@@ -61,8 +61,8 @@ export default function App() {
     );
   };
 
-  const toggleKudos = (postId: string) => {
-    setKudosedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
+  const toggleGG = (postId: string) => {
+    setGgPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
   };
 
   const handleUserClick = (userId: string) => {
@@ -73,8 +73,8 @@ export default function App() {
     if (tab === 'home') {
       if (view === 'main') return (
         <HomeFeedPage
-          kudosedPosts={kudosedPosts}
-          onKudos={toggleKudos}
+          ggPosts={ggPosts}
+          onGG={toggleGG}
           onUserClick={handleUserClick}
         />
       );
@@ -82,8 +82,8 @@ export default function App() {
         <UserProfilePage
           userId={selUserId}
           following={following}
-          kudosedPosts={kudosedPosts}
-          onKudos={toggleKudos}
+          ggPosts={ggPosts}
+          onGG={toggleGG}
           onFollow={toggleFollow}
           goBack={goBack}
         />

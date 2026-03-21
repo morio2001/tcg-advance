@@ -76,8 +76,18 @@ export interface SocialUser {
   avatarColor: string;
   following: number;
   followers: number;
+  // Lifetime
   totalEvents: number;
-  winRate: string;
+  totalWins: number;
+  totalChampionships: number;
+  // Season (current quarter)
+  seasonEvents: number;
+  seasonWins: number;
+  seasonChampionships: number;
+  // Level
+  level: number;
+  levelXp: number;
+  levelXpMax: number;
   recentDeck: string;
 }
 
@@ -94,6 +104,18 @@ export interface FeedPost {
   deckName: string;
   kudosCount: number;
   postedAt: string;
+}
+
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  progress: number;
+  goal: number;
+  unit: string;
+  xpReward: number;
+  completed: boolean;
+  category: 'event' | 'battle' | 'social';
 }
 
 export type TabId = 'home' | 'events' | 'battle' | 'deck' | 'account';

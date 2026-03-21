@@ -1,4 +1,4 @@
-import type { Deck, TcgEvent, RegisteredEvent, HistoryEntry, Opponent, SocialUser, FeedPost } from '../types';
+import type { Deck, TcgEvent, RegisteredEvent, HistoryEntry, Opponent, SocialUser, FeedPost, Challenge } from '../types';
 
 export const TODAY = '2026-03-10';
 
@@ -77,14 +77,23 @@ export const OPPONENTS: Opponent[] = [
 ];
 
 export const MOCK_SOCIAL_USERS: SocialUser[] = [
-  { id: 'u1', name: 'タケシ',  avatarInitial: 'タ', avatarColor: '#c04040', following: 12, followers: 28, totalEvents: 45, winRate: '61%', recentDeck: 'リザードンex' },
-  { id: 'u2', name: 'カスミ',  avatarInitial: 'カ', avatarColor: '#4080d0', following: 8,  followers: 42, totalEvents: 62, winRate: '58%', recentDeck: 'パオジアンex' },
-  { id: 'u3', name: 'シゲル',  avatarInitial: 'シ', avatarColor: '#40a040', following: 20, followers: 15, totalEvents: 31, winRate: '55%', recentDeck: 'ルギアVSTAR' },
-  { id: 'u4', name: 'ヒカリ',  avatarInitial: 'ヒ', avatarColor: '#9040b0', following: 5,  followers: 67, totalEvents: 89, winRate: '63%', recentDeck: 'ミライドンex' },
-  { id: 'u5', name: 'コトネ',  avatarInitial: 'コ', avatarColor: '#b06020', following: 14, followers: 22, totalEvents: 27, winRate: '52%', recentDeck: 'テツノカイナex' },
+  { id: 'u1', name: 'タケシ', avatarInitial: 'タ', avatarColor: '#c04040', following: 12, followers: 28, totalEvents: 45, totalWins: 28, totalChampionships: 4, seasonEvents: 4, seasonWins: 7, seasonChampionships: 1, level: 10, levelXp: 210, levelXpMax: 400, recentDeck: 'リザードンex' },
+  { id: 'u2', name: 'カスミ', avatarInitial: 'カ', avatarColor: '#4080d0', following: 8,  followers: 42, totalEvents: 62, totalWins: 36, totalChampionships: 7, seasonEvents: 5, seasonWins: 11, seasonChampionships: 2, level: 14, levelXp: 80,  levelXpMax: 560, recentDeck: 'パオジアンex' },
+  { id: 'u3', name: 'シゲル', avatarInitial: 'シ', avatarColor: '#40a040', following: 20, followers: 15, totalEvents: 31, totalWins: 17, totalChampionships: 2, seasonEvents: 2, seasonWins: 4,  seasonChampionships: 0, level: 8,  levelXp: 300, levelXpMax: 320, recentDeck: 'ルギアVSTAR' },
+  { id: 'u4', name: 'ヒカリ', avatarInitial: 'ヒ', avatarColor: '#9040b0', following: 5,  followers: 67, totalEvents: 89, totalWins: 56, totalChampionships: 11, seasonEvents: 6, seasonWins: 14, seasonChampionships: 2, level: 18, levelXp: 420, levelXpMax: 720, recentDeck: 'ミライドンex' },
+  { id: 'u5', name: 'コトネ', avatarInitial: 'コ', avatarColor: '#b06020', following: 14, followers: 22, totalEvents: 27, totalWins: 14, totalChampionships: 1, seasonEvents: 3, seasonWins: 5,  seasonChampionships: 0, level: 7,  levelXp: 150, levelXpMax: 280, recentDeck: 'テツノカイナex' },
 ];
 
 export const MOCK_FOLLOWING_IDS: string[] = ['u1', 'u2', 'u4'];
+
+export const MOCK_CHALLENGES: Challenge[] = [
+  { id: 'c1', title: '大会で勝ち越す',         description: '1回の大会で勝ち数が負け数を上回る',         progress: 1, goal: 1,   unit: '回',   xpReward: 50,  completed: true,  category: 'battle' },
+  { id: 'c2', title: '月3回以上大会参加',       description: 'このシーズン中に3回以上大会に参加する',     progress: 3, goal: 3,   unit: '回',   xpReward: 80,  completed: true,  category: 'event'  },
+  { id: 'c3', title: '3店舗以上で参加',         description: '異なる3店舗以上の大会に参加する',           progress: 1, goal: 3,   unit: '店舗', xpReward: 100, completed: false, category: 'event'  },
+  { id: 'c4', title: '合計100勝する',           description: '通算100勝を達成する',                       progress: 31, goal: 100, unit: '勝',  xpReward: 300, completed: false, category: 'battle' },
+  { id: 'c5', title: '同じデッキで5連勝',       description: '同一デッキを使用して5連勝する',             progress: 3, goal: 5,   unit: '連勝', xpReward: 150, completed: false, category: 'battle' },
+  { id: 'c6', title: 'シーズン初優勝',          description: 'このシーズン中に大会で1回優勝する',         progress: 0, goal: 1,   unit: '回',   xpReward: 200, completed: false, category: 'battle' },
+];
 
 export const MOCK_FEED_POSTS: FeedPost[] = [
   { id: 'f1', userId: 'u4', userName: 'ヒカリ', avatarInitial: 'ヒ', avatarColor: '#9040b0', eventName: 'シティリーグ シーズン3 新宿', eventDate: '2026-03-22', result: '5勝1敗', placement: '準優勝/64人', deckName: 'ミライドンex', kudosCount: 12, postedAt: '2時間前' },
