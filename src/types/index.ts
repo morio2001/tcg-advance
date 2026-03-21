@@ -69,7 +69,34 @@ export interface RoundResult {
   first: boolean;
 }
 
-export type TabId = 'events' | 'battle' | 'deck' | 'account';
+export interface SocialUser {
+  id: string;
+  name: string;
+  avatarInitial: string;
+  avatarColor: string;
+  following: number;
+  followers: number;
+  totalEvents: number;
+  winRate: string;
+  recentDeck: string;
+}
+
+export interface FeedPost {
+  id: string;
+  userId: string;
+  userName: string;
+  avatarInitial: string;
+  avatarColor: string;
+  eventName: string;
+  eventDate: string;
+  result: string;
+  placement: string;
+  deckName: string;
+  kudosCount: number;
+  postedAt: string;
+}
+
+export type TabId = 'home' | 'events' | 'battle' | 'deck' | 'account';
 
 export type ViewId =
   | 'main'
@@ -78,4 +105,5 @@ export type ViewId =
   | 'tournament'
   | 'history-detail'
   | 'deck-detail'
-  | 'deck-edit';
+  | 'deck-edit'
+  | 'user-profile';

@@ -1,4 +1,4 @@
-import type { Deck, TcgEvent, RegisteredEvent, HistoryEntry, Opponent } from '../types';
+import type { Deck, TcgEvent, RegisteredEvent, HistoryEntry, Opponent, SocialUser, FeedPost } from '../types';
 
 export const TODAY = '2026-03-10';
 
@@ -74,6 +74,25 @@ export const OPPONENTS: Opponent[] = [
   { name: 'カスミ', table: 'B-1' },
   { name: 'シゲル', table: 'A-7' },
   { name: 'ヒカリ', table: 'C-2' },
+];
+
+export const MOCK_SOCIAL_USERS: SocialUser[] = [
+  { id: 'u1', name: 'タケシ',  avatarInitial: 'タ', avatarColor: '#c04040', following: 12, followers: 28, totalEvents: 45, winRate: '61%', recentDeck: 'リザードンex' },
+  { id: 'u2', name: 'カスミ',  avatarInitial: 'カ', avatarColor: '#4080d0', following: 8,  followers: 42, totalEvents: 62, winRate: '58%', recentDeck: 'パオジアンex' },
+  { id: 'u3', name: 'シゲル',  avatarInitial: 'シ', avatarColor: '#40a040', following: 20, followers: 15, totalEvents: 31, winRate: '55%', recentDeck: 'ルギアVSTAR' },
+  { id: 'u4', name: 'ヒカリ',  avatarInitial: 'ヒ', avatarColor: '#9040b0', following: 5,  followers: 67, totalEvents: 89, winRate: '63%', recentDeck: 'ミライドンex' },
+  { id: 'u5', name: 'コトネ',  avatarInitial: 'コ', avatarColor: '#b06020', following: 14, followers: 22, totalEvents: 27, winRate: '52%', recentDeck: 'テツノカイナex' },
+];
+
+export const MOCK_FOLLOWING_IDS: string[] = ['u1', 'u2', 'u4'];
+
+export const MOCK_FEED_POSTS: FeedPost[] = [
+  { id: 'f1', userId: 'u4', userName: 'ヒカリ', avatarInitial: 'ヒ', avatarColor: '#9040b0', eventName: 'シティリーグ シーズン3 新宿', eventDate: '2026-03-22', result: '5勝1敗', placement: '準優勝/64人', deckName: 'ミライドンex', kudosCount: 12, postedAt: '2時間前' },
+  { id: 'f2', userId: 'u1', userName: 'タケシ',  avatarInitial: 'タ', avatarColor: '#c04040', eventName: 'トレーナーズリーグ 秋葉原',      eventDate: '2026-03-17', result: '3勝1敗', placement: '優勝/20人',     deckName: 'リザードンex', kudosCount: 8,  postedAt: '1日前' },
+  { id: 'f3', userId: 'u2', userName: 'カスミ',  avatarInitial: 'カ', avatarColor: '#4080d0', eventName: 'ジムバトル 渋谷',              eventDate: '2026-03-10', result: '4勝0敗', placement: '優勝/28人',     deckName: 'パオジアンex', kudosCount: 21, postedAt: '2日前' },
+  { id: 'f4', userId: 'u4', userName: 'ヒカリ',  avatarInitial: 'ヒ', avatarColor: '#9040b0', eventName: 'ジムバトル 中野',              eventDate: '2026-03-19', result: '3勝1敗', placement: '3位/32人',      deckName: 'ミライドンex', kudosCount: 5,  postedAt: '3日前' },
+  { id: 'f5', userId: 'u1', userName: 'タケシ',  avatarInitial: 'タ', avatarColor: '#c04040', eventName: 'カジュアルバトル会 池袋',       eventDate: '2026-03-16', result: '2勝1敗', placement: '4位/16人',      deckName: 'リザードンex', kudosCount: 3,  postedAt: '5日前' },
+  { id: 'f6', userId: 'u2', userName: 'カスミ',  avatarInitial: 'カ', avatarColor: '#4080d0', eventName: 'チャンピオンズリーグ予選 東京', eventDate: '2026-03-05', result: '6勝3敗', placement: '32位/512人',    deckName: 'パオジアンex', kudosCount: 15, postedAt: '1週間前' },
 ];
 
 export const ALL_CARDS: string[] = [

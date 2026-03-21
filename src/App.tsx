@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './index.css';
 import type { TabId, ViewId, TcgEvent, RegisteredEvent, HistoryEntry, Deck } from './types';
-import { IconEvent, IconBattle, IconDeck, IconAccount } from './components/Icons';
+import { IconHome, IconEvent, IconBattle, IconDeck, IconAccount } from './components/Icons';
 import { EventsMain } from './pages/EventsMain';
 import { EventSearchPage } from './pages/EventSearchPage';
 import { EventDetailPage } from './pages/EventDetailPage';
@@ -9,15 +9,20 @@ import { TournamentPage } from './pages/TournamentPage';
 import { BattleMain, HistoryDetailPage } from './pages/BattlePages';
 import { DeckMain, DeckDetailPage, DeckEditPage } from './pages/DeckPages';
 import { AccountPage } from './pages/AccountPage';
+import { HomeFeedPage, UserProfilePage } from './pages/SocialPages';
+import { MOCK_FOLLOWING_IDS } from './data/mockData';
 
 export default function App() {
-  const [tab, setTab] = useState<TabId>('events');
+  const [tab, setTab] = useState<TabId>('home');
   const [view, setView] = useState<ViewId>('main');
   const [selEvent, setSelEvent] = useState<TcgEvent | RegisteredEvent | null>(null);
   const [selHistory, setSelHistory] = useState<HistoryEntry | null>(null);
   const [selDeck, setSelDeck] = useState<Deck | null>(null);
   const [checkedIn, setCheckedIn] = useState<Record<string, boolean>>({});
   const [tournamentEvent, setTournamentEvent] = useState<TcgEvent | null>(null);
+  const [selUserId, setSelUserId] = useState<string | null>(null);
+  const [following, setFollowing] = useState<string[]>(MOCK_FOLLOWING_IDS);
+  const [kudosedPosts, setKudosedPosts] = useState<Record<string, boolean>>({});
 
   const nav = (v: ViewId, data?: any) => {
     setView(v);
@@ -25,6 +30,7 @@ export default function App() {
     else if (v === 'history-detail') setSelHistory(data);
     else if (v === 'deck-detail' || v === 'deck-edit') setSelDeck(data);
     else if (v === 'tournament') setTournamentEvent(data);
+    else if (v === 'user-profile') setSelUserId(data);
   };
 
   const goBack = () => {
@@ -33,6 +39,7 @@ export default function App() {
     setSelHistory(null);
     setSelDeck(null);
     setTournamentEvent(null);
+    setSelUserId(null);
   };
 
   const goBackToDeckDetail = () => {
@@ -48,7 +55,40 @@ export default function App() {
     setCheckedIn(prev => ({ ...prev, [id]: true }));
   };
 
+  const toggleFollow = (userId: string) => {
+    setFollowing(prev =>
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
+  };
+
+  const toggleKudos = (postId: string) => {
+    setKudosedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
+  };
+
+  const handleUserClick = (userId: string) => {
+    nav('user-profile', userId);
+  };
+
   const renderContent = () => {
+    if (tab === 'home') {
+      if (view === 'main') return (
+        <HomeFeedPage
+          kudosedPosts={kudosedPosts}
+          onKudos={toggleKudos}
+          onUserClick={handleUserClick}
+        />
+      );
+      if (view === 'user-profile' && selUserId) return (
+        <UserProfilePage
+          userId={selUserId}
+          following={following}
+          kudosedPosts={kudosedPosts}
+          onKudos={toggleKudos}
+          onFollow={toggleFollow}
+          goBack={goBack}
+        />
+      );
+    }
     if (tab === 'events') {
       if (view === 'main') return <EventsMain nav={nav} checkedIn={checkedIn} />;
       if (view === 'search') return <EventSearchPage nav={nav} goBack={goBack} />;
@@ -69,9 +109,10 @@ export default function App() {
   };
 
   const tabs: { id: TabId; label: string; Icon: React.FC }[] = [
-    { id: 'events', label: 'イベント', Icon: IconEvent },
-    { id: 'battle', label: '戦績', Icon: IconBattle },
-    { id: 'deck', label: 'デッキ', Icon: IconDeck },
+    { id: 'home',    label: 'ホーム',     Icon: IconHome },
+    { id: 'events',  label: 'イベント',   Icon: IconEvent },
+    { id: 'battle',  label: '戦績',       Icon: IconBattle },
+    { id: 'deck',    label: 'デッキ',     Icon: IconDeck },
     { id: 'account', label: 'アカウント', Icon: IconAccount },
   ];
 
@@ -100,7 +141,7 @@ export default function App() {
             background: 'none', border: 'none',
             color: tab === t.id ? '#00e0e0' : '#556677',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
-            cursor: 'pointer', padding: '4px 14px', transition: 'color 0.2s',
+            cursor: 'pointer', padding: '4px 10px', transition: 'color 0.2s',
           }}>
             <t.Icon />
             <span style={{ fontSize: '10px', fontWeight: tab === t.id ? 700 : 500 }}>
