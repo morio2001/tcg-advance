@@ -69,6 +69,14 @@ export interface RoundResult {
   first: boolean;
 }
 
+export interface TcgGame {
+  id: string;
+  name: string;
+  short: string;
+  color: string;
+  emoji: string;
+}
+
 export interface SocialUser {
   id: string;
   name: string;
@@ -89,6 +97,7 @@ export interface SocialUser {
   levelXp: number;
   levelXpMax: number;
   recentDeck: string;
+  tcgs: string[]; // TCG game IDs
 }
 
 export interface FeedPost {
@@ -118,7 +127,7 @@ export interface Challenge {
   category: 'event' | 'battle' | 'social';
 }
 
-export type TabId = 'home' | 'events' | 'battle' | 'deck' | 'account';
+export type TabId = 'home' | 'events' | 'battle' | 'deck' | 'search' | 'account';
 
 export type ViewId =
   | 'main'
@@ -128,4 +137,8 @@ export type ViewId =
   | 'history-detail'
   | 'deck-detail'
   | 'deck-edit'
-  | 'user-profile';
+  | 'deck-community'
+  | 'user-profile'
+  | 'public-profile'
+  | 'ranking'
+  | 'search-public';

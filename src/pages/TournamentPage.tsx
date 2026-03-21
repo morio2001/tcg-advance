@@ -10,6 +10,18 @@ interface Props {
 }
 
 type Phase = 'waiting' | 'matching' | 'matched' | 'battling' | 'result-entry' | 'round-complete' | 'tournament-end';
+type PageTab = 'battle' | 'standing';
+
+const MOCK_STANDINGS = [
+  { rank: 1, name: 'カスミ',   initial: 'カ', color: '#4080d0', wins: 3, losses: 0, resistance: 72.5 },
+  { rank: 2, name: 'タケシ',   initial: 'タ', color: '#c04040', wins: 3, losses: 0, resistance: 68.1 },
+  { rank: 3, name: 'イブキ',   initial: 'イ', color: '#4060c0', wins: 2, losses: 1, resistance: 65.3 },
+  { rank: 4, name: 'シロ',     initial: 'シ', color: '#00a0a0', wins: 2, losses: 1, resistance: 63.7, isMe: true },
+  { rank: 5, name: 'ヒカリ',   initial: 'ヒ', color: '#9040b0', wins: 2, losses: 1, resistance: 58.4 },
+  { rank: 6, name: 'コトネ',   initial: 'コ', color: '#b06020', wins: 1, losses: 2, resistance: 55.0 },
+  { rank: 7, name: 'シゲル',   initial: 'シ', color: '#40a040', wins: 1, losses: 2, resistance: 51.2 },
+  { rank: 8, name: 'マサト',   initial: 'マ', color: '#206080', wins: 0, losses: 3, resistance: 44.8 },
+];
 
 const resultLabel = (r: BattleResult) => r === 'win' ? '勝ち' : r === 'lose' ? '負け' : '引き分け';
 const resultColor = (r: BattleResult) => r === 'win' ? '#00c878' : r === 'lose' ? '#ff5050' : '#ffc800';
@@ -47,6 +59,7 @@ export const TournamentPage: React.FC<Props> = ({ event, goBack }) => {
     setPhase('waiting');
   };
 
+  const [pageTab, setPageTab] = useState<PageTab>('battle');
   const wins = results.filter(r => r.result === 'win').length;
   const losses = results.filter(r => r.result === 'lose').length;
   const draws = results.filter(r => r.result === 'draw').length;
@@ -58,6 +71,59 @@ export const TournamentPage: React.FC<Props> = ({ event, goBack }) => {
         <span style={{ fontSize: '16px', fontWeight: 700, flex: 1 }}>大会進行</span>
         <Tag color="orange">LIVE</Tag>
       </div>
+
+      {/* Page tabs */}
+      <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: '4px' }}>
+        {([['battle', '⚔️ 対戦'], ['standing', '📋 スタンディング']] as const).map(([val, label]) => (
+          <button key={val} onClick={() => setPageTab(val)} style={{
+            flex: 1, padding: '10px', border: 'none', cursor: 'pointer',
+            background: 'none', fontFamily: 'inherit',
+            color: pageTab === val ? '#00e0e0' : '#445566',
+            fontSize: '12px', fontWeight: 700,
+            borderBottom: pageTab === val ? '2px solid #00e0e0' : '2px solid transparent',
+            transition: 'all 0.2s',
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {/* Standings tab */}
+      {pageTab === 'standing' && (
+        <div style={{ padding: '12px 16px' }}>
+          <div style={{ fontSize: '11px', color: '#445566', marginBottom: '10px' }}>ラウンド{Math.min(results.length + 1, 4)} 終了時点 · {MOCK_STANDINGS.length}名参加</div>
+          {/* Header */}
+          <div style={{ display: 'flex', padding: '4px 10px', marginBottom: '4px' }}>
+            <span style={{ width: '28px', fontSize: '9px', color: '#334455' }}>#</span>
+            <span style={{ flex: 1, fontSize: '9px', color: '#334455' }}>プレイヤー</span>
+            <span style={{ width: '32px', textAlign: 'center', fontSize: '9px', color: '#334455' }}>勝</span>
+            <span style={{ width: '32px', textAlign: 'center', fontSize: '9px', color: '#334455' }}>負</span>
+            <span style={{ width: '44px', textAlign: 'right', fontSize: '9px', color: '#334455' }}>抵抗値</span>
+          </div>
+          {MOCK_STANDINGS.map(p => (
+            <div key={p.rank} style={{
+              display: 'flex', alignItems: 'center',
+              padding: '8px 10px', marginBottom: '4px', borderRadius: '10px',
+              background: p.isMe ? 'rgba(0,224,224,0.07)' : 'rgba(255,255,255,0.03)',
+              border: p.isMe ? '1px solid rgba(0,224,224,0.2)' : '1px solid rgba(255,255,255,0.05)',
+            }}>
+              <span style={{ width: '28px', fontSize: '12px', fontWeight: 700, color: p.rank <= 4 ? '#ffc800' : '#445566' }}>{p.rank}</span>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, color: '#fff', flexShrink: 0 }}>{p.initial}</div>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: p.isMe ? '#00e0e0' : '#d0d8e0' }}>
+                  {p.name}{p.isMe && <span style={{ fontSize: '9px', color: '#00e0e0', marginLeft: '4px' }}>YOU</span>}
+                </span>
+              </div>
+              <span style={{ width: '32px', textAlign: 'center', fontSize: '13px', fontWeight: 800, color: '#00c878' }}>{p.wins}</span>
+              <span style={{ width: '32px', textAlign: 'center', fontSize: '13px', fontWeight: 800, color: '#ff5050' }}>{p.losses}</span>
+              <span style={{ width: '44px', textAlign: 'right', fontSize: '11px', color: '#556677' }}>{p.resistance}%</span>
+            </div>
+          ))}
+          <div style={{ marginTop: '10px', padding: '8px', background: 'rgba(255,200,0,0.06)', border: '1px solid rgba(255,200,0,0.15)', borderRadius: '8px', fontSize: '10px', color: '#665500', textAlign: 'center' }}>
+            上位4名が決勝トーナメント進出
+          </div>
+        </div>
+      )}
+
+      {pageTab === 'battle' && (
 
       <div style={{ padding: '0 16px 100px' }}>
         {/* Event summary */}
@@ -258,7 +324,7 @@ export const TournamentPage: React.FC<Props> = ({ event, goBack }) => {
         )}
 
         {/* Support during tournament */}
-        {['battling', 'waiting', 'matched'].includes(phase) && (
+        {['battling', 'waiting', 'matched'].includes(phase) && pageTab === 'battle' && (
           <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.08)', marginTop: '16px' }}>
             <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '10px', color: '#c0d0e0' }}>お問い合わせ・サポート</div>
             {[
@@ -279,6 +345,7 @@ export const TournamentPage: React.FC<Props> = ({ event, goBack }) => {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 };

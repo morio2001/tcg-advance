@@ -34,6 +34,7 @@ export const IconEdit = () => <SvgIcon path='<path d="M11 4H4a2 2 0 0 0-2 2v14a2
 export const IconSwords = () => <SvgIcon path='<line x1="4" y1="20" x2="20" y2="4"/><line x1="4" y1="4" x2="20" y2="20"/><path d="M14.5 3.5L21 3l-.5 7.5"/><path d="M9.5 20.5L3 21l.5-7.5"/>' size={20} />;
 
 export const IconHome = () => <SvgIcon path='<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>' />;
+export const IconSearchNav = () => <SvgIcon path='<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>' />;
 
 export const IconSparkle = () => (
   <span

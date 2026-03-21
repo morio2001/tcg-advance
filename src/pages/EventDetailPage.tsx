@@ -4,15 +4,25 @@ import { TODAY, MOCK_REGISTERED, MOCK_MY_DECKS } from '../data/mockData';
 import { IconBack, IconClock, IconPin, IconUsers, IconCheck, IconSwords, IconMsg, IconAlert } from '../components/Icons';
 import { Tag, REG_COLOR } from '../components/Shared';
 
+const FRIENDS_GOING: Record<string, { name: string; initial: string; color: string }[]> = {
+  'e2': [{ name: 'ヒカリ', initial: 'ヒ', color: '#9040b0' }, { name: 'カスミ', initial: 'カ', color: '#4080d0' }],
+  'e4': [{ name: 'タケシ', initial: 'タ', color: '#c04040' }, { name: 'ヒカリ', initial: 'ヒ', color: '#9040b0' }],
+  'e7': [{ name: 'カスミ', initial: 'カ', color: '#4080d0' }],
+};
+
 interface Props {
   event: TcgEvent | RegisteredEvent | null;
   goBack: () => void;
   doCheckIn: (id: string) => void;
   checkedIn: Record<string, boolean>;
   nav: (view: ViewId, data?: any) => void;
+  goingEvents: Record<string, boolean>;
+  onToggleGoing: (id: string) => void;
+  reservedEvents: Record<string, boolean>;
+  onToggleReserved: (id: string) => void;
 }
 
-export const EventDetailPage: React.FC<Props> = ({ event, goBack, doCheckIn, checkedIn, nav }) => {
+export const EventDetailPage: React.FC<Props> = ({ event, goBack, doCheckIn, checkedIn, nav, goingEvents, onToggleGoing, reservedEvents, onToggleReserved }) => {
   const [showDeckSel, setShowDeckSel] = useState(false);
   const [selDeck, setSelDeck] = useState<string | null>(null);
   if (!event) return null;
@@ -20,6 +30,9 @@ export const EventDetailPage: React.FC<Props> = ({ event, goBack, doCheckIn, che
   const isReg = MOCK_REGISTERED.some(r => r.id === event.id);
   const today = event.date === TODAY;
   const isCheckedIn = checkedIn[event.id];
+  const isGoing = goingEvents[event.id] || false;
+  const isReserved = reservedEvents[event.id] || false;
+  const friendsGoing = FRIENDS_GOING[event.id] || [];
 
   return (
     <div>
@@ -121,6 +134,73 @@ export const EventDetailPage: React.FC<Props> = ({ event, goBack, doCheckIn, che
             )}
           </div>
         )}
+
+        {/* Going */}
+        <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#c0d0e0' }}>行くよ！宣言</div>
+              {friendsGoing.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
+                  <div style={{ display: 'flex', gap: '-4px' }}>
+                    {friendsGoing.map((f, i) => (
+                      <div key={i} style={{
+                        width: '24px', height: '24px', borderRadius: '50%', background: f.color,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '10px', fontWeight: 800, color: '#fff',
+                        border: '2px solid #0a0e1a', marginLeft: i > 0 ? '-6px' : 0,
+                      }}>{f.initial}</div>
+                    ))}
+                  </div>
+                  <span style={{ fontSize: '11px', color: '#8899aa' }}>
+                    {friendsGoing.map(f => f.name).join('、')}が参加予定
+                  </span>
+                </div>
+              )}
+              {friendsGoing.length === 0 && (
+                <div style={{ fontSize: '11px', color: '#445566', marginTop: '4px' }}>まだ友達の参加予定がありません</div>
+              )}
+            </div>
+            <button
+              onClick={() => onToggleGoing(event.id)}
+              style={{
+                padding: '8px 18px', borderRadius: '20px', cursor: 'pointer',
+                fontFamily: 'inherit', fontSize: '13px', fontWeight: 800, transition: 'all 0.2s',
+                background: isGoing
+                  ? 'linear-gradient(135deg, #ffc800, #ff8000)'
+                  : 'rgba(255,200,0,0.1)',
+                color: isGoing ? '#1a0a00' : '#ffc800',
+                border: isGoing ? 'none' : '1px solid rgba(255,200,0,0.3)',
+                boxShadow: isGoing ? '0 2px 12px rgba(255,200,0,0.3)' : 'none',
+              }}
+            >
+              {isGoing ? '✓ 行くよ！' : '行くよ！'}
+            </button>
+          </div>
+        </div>
+
+        {/* Reserve */}
+        <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '12px', padding: '12px 14px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#c0d0e0' }}>予約する</div>
+            <div style={{ fontSize: '11px', color: '#445566', marginTop: '3px' }}>
+              {isReserved ? '予約済み・カレンダーに反映されました' : '事前予約で当日の受付をスキップ'}
+            </div>
+          </div>
+          <button
+            onClick={() => onToggleReserved(event.id)}
+            style={{
+              padding: '8px 18px', borderRadius: '20px', cursor: 'pointer',
+              fontFamily: 'inherit', fontSize: '13px', fontWeight: 800, transition: 'all 0.2s',
+              background: isReserved ? 'linear-gradient(135deg, #00c878, #00a060)' : 'rgba(0,200,120,0.1)',
+              color: isReserved ? '#fff' : '#00c878',
+              border: isReserved ? 'none' : '1px solid rgba(0,200,120,0.3)',
+              boxShadow: isReserved ? '0 2px 12px rgba(0,200,120,0.25)' : 'none',
+            }}
+          >
+            {isReserved ? '✓ 予約済' : '予約する'}
+          </button>
+        </div>
 
         {/* Support */}
         <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '12px', padding: '14px', border: '1px solid rgba(255,255,255,0.08)' }}>

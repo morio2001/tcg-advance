@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
 import type { FeedPost, SocialUser, Challenge } from '../types';
-import { MOCK_FEED_POSTS, MOCK_SOCIAL_USERS, MOCK_CHALLENGES } from '../data/mockData';
+import { MOCK_FEED_POSTS, MOCK_SOCIAL_USERS, MOCK_CHALLENGES, TCG_GAMES, MY_TCG_IDS } from '../data/mockData';
 import { IconBack } from '../components/Icons';
 import { SectionHeader } from '../components/Shared';
 
 const CURRENT_SEASON = '2026-1Q';
 
+// My (logged-in user) profile info
+const MY_PROFILE_INFO = {
+  name: 'シロ',
+  initial: 'シ',
+  avatarColor: '#00a0a0',
+  favoriteShop: 'カードラボ秋葉原',
+};
+
 // My (logged-in user) stats
 const MY_STATS = {
-  lifetime: { events: 47, wins: 31, championships: 3, level: 12, levelXp: 450, levelXpMax: 600 },
-  season:   { events: 3,  wins: 8,  championships: 1 },
+  lifetime: { events: 47, wins: 31, championships: 3, level: 12, levelXp: 450, levelXpMax: 600, rankNational: 847, rankArea: 12 },
+  season:   { events: 3,  wins: 8,  championships: 1, rankNational: 234, rankArea: 8 },
 };
 
 // March 2026 event days (day number → type)
@@ -18,6 +26,11 @@ const MARCH_EVENTS: Record<number, 'registered' | 'other'> = {
   18: 'other', 19: 'other', 21: 'other', 22: 'registered',
 };
 const CALENDAR_TODAY = 21;
+
+// Event ID → March day number
+const EVENT_DATE_MAP: Record<string, number> = {
+  e1: 10, e2: 22, e3: 16, e4: 17, e5: 18, e6: 19, e7: 21,
+};
 
 const placementColor = (p: string): string => {
   if (p.startsWith('優勝') || p.startsWith('1位')) return '#ffc800';
@@ -104,21 +117,11 @@ const FeedCard: React.FC<FeedCardProps> = ({ post, isGGed, onGG, onUserClick, sh
   );
 };
 
-/* ─── StatsCard ─── */
-const StatsCard: React.FC = () => {
+/* ─── ProfileCard ─── */
+const ProfileCard: React.FC = () => {
   const [mode, setMode] = useState<'lifetime' | 'season'>('lifetime');
-  const isLifetime = mode === 'lifetime';
-  const stats = isLifetime ? MY_STATS.lifetime : MY_STATS.season;
+  const stats = mode === 'lifetime' ? MY_STATS.lifetime : MY_STATS.season;
   const xpPct = (MY_STATS.lifetime.levelXp / MY_STATS.lifetime.levelXpMax) * 100;
-
-  const StatBox: React.FC<{ label: string; value: number }> = ({ label, value }) => (
-    <div style={{ flex: 1, padding: '4px 6px' }}>
-      <div style={{ fontSize: '10px', color: '#556677', marginBottom: '2px' }}>{label}</div>
-      <div style={{ fontSize: '22px', fontWeight: 800, color: '#e0e8f0', lineHeight: 1 }}>
-        {value.toLocaleString()}
-      </div>
-    </div>
-  );
 
   return (
     <div style={{
@@ -126,58 +129,104 @@ const StatsCard: React.FC = () => {
       border: '1px solid rgba(0,180,255,0.15)',
       borderRadius: '14px', padding: '14px', userSelect: 'none',
     }}>
-      {/* Toggle */}
-      <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
-        {(['lifetime', 'season'] as const).map(m => (
-          <button
-            key={m}
-            onClick={() => setMode(m)}
-            style={{
-              background: mode === m ? 'rgba(0,224,224,0.18)' : 'rgba(255,255,255,0.05)',
-              border: `1px solid ${mode === m ? 'rgba(0,224,224,0.4)' : 'rgba(255,255,255,0.1)'}`,
-              borderRadius: '20px', padding: '3px 12px', cursor: 'pointer',
-              color: mode === m ? '#00e0e0' : '#556677',
-              fontSize: '11px', fontWeight: 700, transition: 'all 0.2s',
-            }}
-          >
-            {m === 'lifetime' ? 'Lifetime' : CURRENT_SEASON}
-          </button>
+      {/* ── Profile header ── */}
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'flex-start' }}>
+        {/* Avatar */}
+        <div style={{
+          width: 50, height: 50, borderRadius: '50%', background: MY_PROFILE_INFO.avatarColor,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '20px', fontWeight: 700, color: '#fff', flexShrink: 0,
+          boxShadow: '0 0 12px rgba(0,224,224,0.25)',
+        }}>{MY_PROFILE_INFO.initial}</div>
+
+        {/* Info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Name row + toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
+            <span style={{ fontSize: '17px', fontWeight: 800, color: '#e8f4ff' }}>{MY_PROFILE_INFO.name}</span>
+            <div style={{ display: 'flex', gap: '3px' }}>
+              {(['lifetime', 'season'] as const).map(m => (
+                <button key={m} onClick={() => setMode(m)} style={{
+                  background: mode === m ? 'rgba(0,224,224,0.18)' : 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${mode === m ? 'rgba(0,224,224,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                  borderRadius: '10px', padding: '2px 7px', cursor: 'pointer',
+                  color: mode === m ? '#00e0e0' : '#445566',
+                  fontSize: '9px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.15s',
+                }}>
+                  {m === 'lifetime' ? 'Life' : CURRENT_SEASON}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* LV + XP */}
+          <div style={{ fontSize: '11px', color: '#00e0e0', fontWeight: 700, marginBottom: '3px' }}>
+            LV.{MY_STATS.lifetime.level}
+            <span style={{ fontSize: '9px', color: '#334455', fontWeight: 400, marginLeft: '6px' }}>
+              {MY_STATS.lifetime.levelXp}/{MY_STATS.lifetime.levelXpMax} XP
+            </span>
+          </div>
+          <div style={{ height: '3px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', marginBottom: '6px', overflow: 'hidden', maxWidth: '140px' }}>
+            <div style={{ height: '100%', width: `${xpPct}%`, background: 'linear-gradient(90deg, #0060a0, #00e0e0)', borderRadius: '2px' }} />
+          </div>
+
+          {/* TCG badges */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '4px' }}>
+            {MY_TCG_IDS.map(id => {
+              const g = TCG_GAMES.find(g => g.id === id);
+              if (!g) return null;
+              return (
+                <div key={id} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '2px',
+                  background: `${g.color}15`, border: `1px solid ${g.color}35`,
+                  borderRadius: '8px', padding: '1px 5px',
+                  fontSize: '9px', fontWeight: 700, color: g.color,
+                }}><span>{g.emoji}</span>{g.short}</div>
+              );
+            })}
+          </div>
+
+          {/* 推しショップ */}
+          <div style={{ fontSize: '10px', color: '#445566' }}>
+            🏪 <span style={{ color: '#7090a0' }}>{MY_PROFILE_INFO.favoriteShop}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Divider ── */}
+      <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', marginBottom: '10px' }} />
+
+      {/* ── Stats row ── */}
+      <div style={{ display: 'flex', marginBottom: '8px' }}>
+        {[
+          { label: '大会参加', value: stats.events },
+          { label: '勝利数', value: stats.wins },
+          { label: '優勝数', value: stats.championships },
+        ].map(({ label, value }, i) => (
+          <div key={label} style={{
+            flex: 1, textAlign: 'center',
+            borderRight: i < 2 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+          }}>
+            <div style={{ fontSize: '20px', fontWeight: 800, color: '#e0e8f0', lineHeight: 1 }}>
+              {value.toLocaleString()}
+            </div>
+            <div style={{ fontSize: '9px', color: '#556677', marginTop: '2px' }}>{label}</div>
+          </div>
         ))}
       </div>
 
-      {/* LV + Stats layout */}
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'stretch' }}>
-        {/* LV column */}
-        <div style={{
-          width: '96px', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center',
-          borderRight: '1px solid rgba(255,255,255,0.08)', paddingRight: '12px',
-        }}>
-          <div style={{ fontSize: '9px', color: '#445566', letterSpacing: '1.5px', marginBottom: '2px' }}>LEVEL</div>
-          <div style={{ fontSize: '42px', fontWeight: 900, color: '#00e0e0', lineHeight: 1, marginBottom: '10px' }}>
-            {MY_STATS.lifetime.level}
-          </div>
-          <div style={{ height: '5px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', marginBottom: '4px', overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', width: `${xpPct}%`,
-              background: 'linear-gradient(90deg, #0060a0, #00e0e0)',
-              borderRadius: '3px',
-            }} />
-          </div>
-          <div style={{ fontSize: '10px', color: '#334455' }}>
-            {MY_STATS.lifetime.levelXp}/{MY_STATS.lifetime.levelXpMax} XP
+      {/* ── Rankings row ── */}
+      <div style={{ display: 'flex', gap: '6px' }}>
+        <div style={{ flex: 1, padding: '3px 6px' }}>
+          <div style={{ fontSize: '9px', color: '#445566', marginBottom: '1px' }}>全国ランク</div>
+          <div style={{ fontSize: '14px', fontWeight: 800, color: '#ffc800', lineHeight: 1 }}>
+            #{stats.rankNational}<span style={{ fontSize: '9px', color: '#556677', fontWeight: 400 }}>位</span>
           </div>
         </div>
-
-        {/* Stats grid */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', justifyContent: 'center' }}>
-          {/* Row 1 */}
-          <div style={{ display: 'flex', paddingBottom: '8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <StatBox label="大会参加" value={stats.events} />
-            <StatBox label="勝利数" value={stats.wins} />
-          </div>
-          {/* Row 2 */}
-          <div style={{ display: 'flex' }}>
-            <StatBox label="優勝数" value={stats.championships} />
+        <div style={{ flex: 1, padding: '3px 6px' }}>
+          <div style={{ fontSize: '9px', color: '#445566', marginBottom: '1px' }}>エリアランク</div>
+          <div style={{ fontSize: '14px', fontWeight: 800, color: '#a064ff', lineHeight: 1 }}>
+            #{stats.rankArea}<span style={{ fontSize: '9px', color: '#556677', fontWeight: 400 }}>位</span>
           </div>
         </div>
       </div>
@@ -186,14 +235,37 @@ const StatsCard: React.FC = () => {
 };
 
 /* ─── CalendarCard ─── */
-const CalendarCard: React.FC = () => {
+interface CalendarCardProps {
+  goingEvents: Record<string, boolean>;
+  reservedEvents: Record<string, boolean>;
+}
+
+const CalendarCard: React.FC<CalendarCardProps> = ({ goingEvents, reservedEvents }) => {
   const DAYS = ['日', '月', '火', '水', '木', '金', '土'];
-  // March 2026 starts on Sunday (day 0)
   const cells: (number | null)[] = [
     ...Array(0).fill(null),
     ...Array.from({ length: 31 }, (_, i) => i + 1),
   ];
   while (cells.length % 7 !== 0) cells.push(null);
+
+  // Build day → status map (priority: reserved > going > registered > other)
+  const dayStatus: Record<number, 'reserved' | 'going' | 'registered' | 'other'> = {};
+  Object.entries(MARCH_EVENTS).forEach(([d, type]) => {
+    dayStatus[Number(d)] = type === 'registered' ? 'registered' : 'other';
+  });
+  Object.entries(EVENT_DATE_MAP).forEach(([eventId, day]) => {
+    if (goingEvents[eventId]) {
+      if (dayStatus[day] !== 'reserved') dayStatus[day] = 'going';
+    }
+    if (reservedEvents[eventId]) dayStatus[day] = 'reserved';
+  });
+
+  const STATUS_BORDER: Record<string, string> = {
+    reserved:   '#00c878',
+    going:      '#ffc800',
+    registered: '#00e0e0',
+    other:      'rgba(255,255,255,0.18)',
+  };
 
   return (
     <div style={{
@@ -201,17 +273,17 @@ const CalendarCard: React.FC = () => {
       border: '1px solid rgba(140,60,255,0.15)',
       borderRadius: '14px', padding: '14px', userSelect: 'none',
     }}>
-      <div style={{ textAlign: 'center', fontSize: '13px', fontWeight: 700, color: '#b090f0', marginBottom: '10px' }}>
+      <div style={{ textAlign: 'center', fontSize: '13px', fontWeight: 700, color: '#b090f0', marginBottom: '8px' }}>
         2026年3月
       </div>
 
       {/* Day headers */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: '4px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: '2px' }}>
         {DAYS.map((d, i) => (
           <div key={d} style={{
             textAlign: 'center', fontSize: '10px',
             color: i === 0 ? '#ff7777' : i === 6 ? '#7799ff' : '#445566',
-            paddingBottom: '4px',
+            paddingBottom: '3px',
           }}>{d}</div>
         ))}
       </div>
@@ -221,43 +293,38 @@ const CalendarCard: React.FC = () => {
         {cells.map((day, idx) => {
           const col = idx % 7;
           const isToday = day === CALENDAR_TODAY;
-          const eventType = day ? MARCH_EVENTS[day] : undefined;
+          const status = day ? dayStatus[day] : undefined;
+          const baseTextColor = col === 0 ? '#ff8888' : col === 6 ? '#8899ff' : '#a0b0c0';
           return (
-            <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2px 0' }}>
+            <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1px 0' }}>
               <div style={{
-                width: 26, height: 26,
+                width: 24, height: 24,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 borderRadius: '50%',
-                background: isToday ? 'rgba(0,224,224,0.2)' : 'transparent',
-                border: isToday ? '1px solid rgba(0,224,224,0.5)' : '1px solid transparent',
+                border: status ? `1.5px solid ${STATUS_BORDER[status]}` : '1.5px solid transparent',
                 fontSize: '11px',
                 color: day == null ? 'transparent'
-                  : col === 0 ? '#ff8888'
-                  : col === 6 ? '#8899ff'
-                  : '#a0b0c0',
-                fontWeight: isToday ? 700 : 400,
+                  : isToday ? '#00e0e0'
+                  : baseTextColor,
+                fontWeight: isToday ? 800 : status ? 600 : 400,
               }}>
                 {day ?? ''}
               </div>
-              {eventType && (
-                <div style={{
-                  width: 4, height: 4, borderRadius: '50%', marginTop: '1px',
-                  background: eventType === 'registered' ? '#00e0e0' : 'rgba(255,255,255,0.25)',
-                }} />
-              )}
             </div>
           );
         })}
       </div>
 
       {/* Legend */}
-      <div style={{ display: 'flex', gap: '14px', marginTop: '10px', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: '10px', marginTop: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
         {[
           { color: '#00e0e0', label: '参加予定' },
-          { color: 'rgba(255,255,255,0.3)', label: '大会あり' },
+          { color: '#00c878', label: '予約済' },
+          { color: '#ffc800', label: '行くよ！' },
+          { color: 'rgba(255,255,255,0.18)', label: '大会あり' },
         ].map(({ color, label }) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '10px', color: '#445566' }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: color }} />
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '9px', color: '#445566' }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', border: `1.5px solid ${color}` }} />
             {label}
           </div>
         ))}
@@ -325,9 +392,11 @@ interface HomeFeedPageProps {
   ggPosts: Record<string, boolean>;
   onGG: (id: string) => void;
   onUserClick: (userId: string) => void;
+  goingEvents: Record<string, boolean>;
+  reservedEvents: Record<string, boolean>;
 }
 
-export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUserClick }) => {
+export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUserClick, goingEvents, reservedEvents }) => {
   const [slide, setSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const TOTAL_SLIDES = 2;
@@ -337,9 +406,7 @@ export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUse
 
   return (
     <div style={{ padding: '16px' }}>
-      <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#00e0e0', marginBottom: '14px', letterSpacing: '-0.5px' }}>
-        ホーム
-      </h2>
+      <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#00e0e0', margin: '0 0 14px', letterSpacing: '-0.5px' }}>ホーム</h2>
 
       {/* Carousel */}
       <div
@@ -358,8 +425,8 @@ export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUse
           transform: `translateX(-${slide * 100}%)`,
           transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
         }}>
-          <div style={{ minWidth: '100%' }}><StatsCard /></div>
-          <div style={{ minWidth: '100%' }}><CalendarCard /></div>
+          <div style={{ minWidth: '100%' }}><ProfileCard /></div>
+          <div style={{ minWidth: '100%' }}><CalendarCard goingEvents={goingEvents} reservedEvents={reservedEvents} /></div>
         </div>
       </div>
 
@@ -497,6 +564,27 @@ export const UserProfilePage: React.FC<UserProfilePageProps> = ({
           {isFollowing ? 'フォロー中' : 'フォローする'}
         </button>
       </div>
+
+      {/* TCG Games */}
+      {user.tcgs && user.tcgs.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '14px' }}>
+          {user.tcgs.map(id => {
+            const g = TCG_GAMES.find(g => g.id === id);
+            if (!g) return null;
+            return (
+              <div key={id} style={{
+                display: 'inline-flex', alignItems: 'center', gap: '4px',
+                background: `${g.color}15`,
+                border: `1px solid ${g.color}40`,
+                borderRadius: '20px', padding: '4px 10px',
+                fontSize: '11px', fontWeight: 700, color: g.color,
+              }}>
+                <span>{g.emoji}</span>{g.short}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* LV Bar */}
       <div style={{

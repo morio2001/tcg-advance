@@ -1,6 +1,18 @@
-import type { Deck, TcgEvent, RegisteredEvent, HistoryEntry, Opponent, SocialUser, FeedPost, Challenge } from '../types';
+import type { Deck, TcgEvent, RegisteredEvent, HistoryEntry, Opponent, SocialUser, FeedPost, Challenge, TcgGame } from '../types';
 
 export const TODAY = '2026-03-10';
+
+export const TCG_GAMES: TcgGame[] = [
+  { id: 'ptcg',  name: 'ポケモンカード',             short: 'ポケカ',  color: '#e83030', emoji: '⚡' },
+  { id: 'mtg',   name: 'マジック:ザ・ギャザリング',  short: 'MTG',    color: '#c8a040', emoji: '💎' },
+  { id: 'optcg', name: 'ワンピースカード',             short: 'OP',     color: '#e85010', emoji: '☠️' },
+  { id: 'dm',    name: 'デュエルマスターズ',           short: 'デュエマ', color: '#4080e0', emoji: '🔷' },
+  { id: 'ygo',   name: '遊戯王OCG',                   short: '遊戯王', color: '#a060e0', emoji: '🐉' },
+  { id: 'ws',    name: 'ヴァイスシュヴァルツ',        short: 'WS',     color: '#e040a0', emoji: '🌟' },
+];
+
+// My (logged-in user シロ) TCG IDs
+export const MY_TCG_IDS: string[] = ['ptcg', 'dm'];
 
 export const MOCK_MY_DECKS: Deck[] = [
   { id: 'd1', name: 'リザードンex', cards: 60, isPublic: false, cardList: [
@@ -77,11 +89,11 @@ export const OPPONENTS: Opponent[] = [
 ];
 
 export const MOCK_SOCIAL_USERS: SocialUser[] = [
-  { id: 'u1', name: 'タケシ', avatarInitial: 'タ', avatarColor: '#c04040', following: 12, followers: 28, totalEvents: 45, totalWins: 28, totalChampionships: 4, seasonEvents: 4, seasonWins: 7, seasonChampionships: 1, level: 10, levelXp: 210, levelXpMax: 400, recentDeck: 'リザードンex' },
-  { id: 'u2', name: 'カスミ', avatarInitial: 'カ', avatarColor: '#4080d0', following: 8,  followers: 42, totalEvents: 62, totalWins: 36, totalChampionships: 7, seasonEvents: 5, seasonWins: 11, seasonChampionships: 2, level: 14, levelXp: 80,  levelXpMax: 560, recentDeck: 'パオジアンex' },
-  { id: 'u3', name: 'シゲル', avatarInitial: 'シ', avatarColor: '#40a040', following: 20, followers: 15, totalEvents: 31, totalWins: 17, totalChampionships: 2, seasonEvents: 2, seasonWins: 4,  seasonChampionships: 0, level: 8,  levelXp: 300, levelXpMax: 320, recentDeck: 'ルギアVSTAR' },
-  { id: 'u4', name: 'ヒカリ', avatarInitial: 'ヒ', avatarColor: '#9040b0', following: 5,  followers: 67, totalEvents: 89, totalWins: 56, totalChampionships: 11, seasonEvents: 6, seasonWins: 14, seasonChampionships: 2, level: 18, levelXp: 420, levelXpMax: 720, recentDeck: 'ミライドンex' },
-  { id: 'u5', name: 'コトネ', avatarInitial: 'コ', avatarColor: '#b06020', following: 14, followers: 22, totalEvents: 27, totalWins: 14, totalChampionships: 1, seasonEvents: 3, seasonWins: 5,  seasonChampionships: 0, level: 7,  levelXp: 150, levelXpMax: 280, recentDeck: 'テツノカイナex' },
+  { id: 'u1', name: 'タケシ', avatarInitial: 'タ', avatarColor: '#c04040', following: 12, followers: 28, totalEvents: 45, totalWins: 28, totalChampionships: 4, seasonEvents: 4, seasonWins: 7, seasonChampionships: 1, level: 10, levelXp: 210, levelXpMax: 400, recentDeck: 'リザードンex', tcgs: ['ptcg', 'ygo'] },
+  { id: 'u2', name: 'カスミ', avatarInitial: 'カ', avatarColor: '#4080d0', following: 8,  followers: 42, totalEvents: 62, totalWins: 36, totalChampionships: 7, seasonEvents: 5, seasonWins: 11, seasonChampionships: 2, level: 14, levelXp: 80,  levelXpMax: 560, recentDeck: 'パオジアンex', tcgs: ['ptcg', 'mtg'] },
+  { id: 'u3', name: 'シゲル', avatarInitial: 'シ', avatarColor: '#40a040', following: 20, followers: 15, totalEvents: 31, totalWins: 17, totalChampionships: 2, seasonEvents: 2, seasonWins: 4,  seasonChampionships: 0, level: 8,  levelXp: 300, levelXpMax: 320, recentDeck: 'ルギアVSTAR', tcgs: ['ptcg', 'dm'] },
+  { id: 'u4', name: 'ヒカリ', avatarInitial: 'ヒ', avatarColor: '#9040b0', following: 5,  followers: 67, totalEvents: 89, totalWins: 56, totalChampionships: 11, seasonEvents: 6, seasonWins: 14, seasonChampionships: 2, level: 18, levelXp: 420, levelXpMax: 720, recentDeck: 'ミライドンex', tcgs: ['ptcg'] },
+  { id: 'u5', name: 'コトネ', avatarInitial: 'コ', avatarColor: '#b06020', following: 14, followers: 22, totalEvents: 27, totalWins: 14, totalChampionships: 1, seasonEvents: 3, seasonWins: 5,  seasonChampionships: 0, level: 7,  levelXp: 150, levelXpMax: 280, recentDeck: 'テツノカイナex', tcgs: ['ptcg', 'optcg', 'ws'] },
 ];
 
 export const MOCK_FOLLOWING_IDS: string[] = ['u1', 'u2', 'u4'];

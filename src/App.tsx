@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './index.css';
 import type { TabId, ViewId, TcgEvent, RegisteredEvent, HistoryEntry, Deck } from './types';
-import { IconHome, IconEvent, IconBattle, IconDeck, IconAccount } from './components/Icons';
+import { IconHome, IconEvent, IconBattle, IconDeck, IconAccount, IconSearchNav } from './components/Icons';
 import { EventsMain } from './pages/EventsMain';
 import { EventSearchPage } from './pages/EventSearchPage';
 import { EventDetailPage } from './pages/EventDetailPage';
@@ -10,6 +10,10 @@ import { BattleMain, HistoryDetailPage } from './pages/BattlePages';
 import { DeckMain, DeckDetailPage, DeckEditPage } from './pages/DeckPages';
 import { AccountPage } from './pages/AccountPage';
 import { HomeFeedPage, UserProfilePage } from './pages/SocialPages';
+import { PublicProfilePage } from './pages/PublicProfilePage';
+import { RankingPage } from './pages/RankingPage';
+import { PublicSearchPage, SearchHubPage } from './pages/PublicSearchPage';
+import { CommunityDeckPage } from './pages/CommunityDeckPage';
 import { MOCK_FOLLOWING_IDS } from './data/mockData';
 
 export default function App() {
@@ -23,6 +27,9 @@ export default function App() {
   const [selUserId, setSelUserId] = useState<string | null>(null);
   const [following, setFollowing] = useState<string[]>(MOCK_FOLLOWING_IDS);
   const [ggPosts, setGgPosts] = useState<Record<string, boolean>>({});
+  const [goingEvents, setGoingEvents] = useState<Record<string, boolean>>({});
+  const [reservedEvents, setReservedEvents] = useState<Record<string, boolean>>({});
+  const [selSearchTab, setSelSearchTab] = useState<'player' | 'deck'>('player');
 
   const nav = (v: ViewId, data?: any) => {
     setView(v);
@@ -31,6 +38,7 @@ export default function App() {
     else if (v === 'deck-detail' || v === 'deck-edit') setSelDeck(data);
     else if (v === 'tournament') setTournamentEvent(data);
     else if (v === 'user-profile') setSelUserId(data);
+    else if (v === 'search-public') setSelSearchTab((data as 'player' | 'deck') || 'player');
   };
 
   const goBack = () => {
@@ -65,6 +73,14 @@ export default function App() {
     setGgPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
   };
 
+  const toggleGoing = (eventId: string) => {
+    setGoingEvents(prev => ({ ...prev, [eventId]: !prev[eventId] }));
+  };
+
+  const toggleReserved = (eventId: string) => {
+    setReservedEvents(prev => ({ ...prev, [eventId]: !prev[eventId] }));
+  };
+
   const handleUserClick = (userId: string) => {
     nav('user-profile', userId);
   };
@@ -76,6 +92,8 @@ export default function App() {
           ggPosts={ggPosts}
           onGG={toggleGG}
           onUserClick={handleUserClick}
+          goingEvents={goingEvents}
+          reservedEvents={reservedEvents}
         />
       );
       if (view === 'user-profile' && selUserId) return (
@@ -88,11 +106,22 @@ export default function App() {
           goBack={goBack}
         />
       );
+      if (view === 'ranking') return <RankingPage goBack={goBack} />;
+    }
+    if (tab === 'search') {
+      if (view === 'main') return <SearchHubPage nav={nav} />;
+      if (view === 'search-public') return <PublicSearchPage goBack={goBack} onUserClick={id => nav('user-profile', id)} initialTab={selSearchTab} />;
+      if (view === 'search') return <EventSearchPage nav={nav} goBack={goBack} />;
+      if (view === 'detail') return <EventDetailPage event={selEvent} goBack={goBack} doCheckIn={doCheckIn} checkedIn={checkedIn} nav={nav} goingEvents={goingEvents} onToggleGoing={toggleGoing} reservedEvents={reservedEvents} onToggleReserved={toggleReserved} />;
+      if (view === 'tournament') return <TournamentPage event={tournamentEvent} goBack={goBack} />;
+      if (view === 'user-profile' && selUserId) return (
+        <UserProfilePage userId={selUserId} following={following} ggPosts={ggPosts} onGG={toggleGG} onFollow={toggleFollow} goBack={goBack} />
+      );
     }
     if (tab === 'events') {
       if (view === 'main') return <EventsMain nav={nav} checkedIn={checkedIn} />;
       if (view === 'search') return <EventSearchPage nav={nav} goBack={goBack} />;
-      if (view === 'detail') return <EventDetailPage event={selEvent} goBack={goBack} doCheckIn={doCheckIn} checkedIn={checkedIn} nav={nav} />;
+      if (view === 'detail') return <EventDetailPage event={selEvent} goBack={goBack} doCheckIn={doCheckIn} checkedIn={checkedIn} nav={nav} goingEvents={goingEvents} onToggleGoing={toggleGoing} reservedEvents={reservedEvents} onToggleReserved={toggleReserved} />;
       if (view === 'tournament') return <TournamentPage event={tournamentEvent} goBack={goBack} />;
     }
     if (tab === 'battle') {
@@ -103,8 +132,12 @@ export default function App() {
       if (view === 'main') return <DeckMain nav={nav} />;
       if (view === 'deck-detail') return <DeckDetailPage deck={selDeck} goBack={goBack} nav={nav} />;
       if (view === 'deck-edit') return <DeckEditPage deck={selDeck} goBack={goBackToDeckDetail} />;
+      if (view === 'deck-community') return <CommunityDeckPage goBack={goBack} />;
     }
-    if (tab === 'account') return <AccountPage />;
+    if (tab === 'account') {
+      if (view === 'main') return <AccountPage nav={nav} />;
+      if (view === 'public-profile') return <PublicProfilePage goBack={goBack} />;
+    }
     return null;
   };
 
@@ -113,6 +146,7 @@ export default function App() {
     { id: 'events',  label: 'イベント',   Icon: IconEvent },
     { id: 'battle',  label: '戦績',       Icon: IconBattle },
     { id: 'deck',    label: 'デッキ',     Icon: IconDeck },
+    { id: 'search',  label: '検索',       Icon: IconSearchNav },
     { id: 'account', label: 'アカウント', Icon: IconAccount },
   ];
 
@@ -141,7 +175,7 @@ export default function App() {
             background: 'none', border: 'none',
             color: tab === t.id ? '#00e0e0' : '#556677',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
-            cursor: 'pointer', padding: '4px 10px', transition: 'color 0.2s',
+            cursor: 'pointer', padding: '4px 6px', transition: 'color 0.2s',
           }}>
             <t.Icon />
             <span style={{ fontSize: '10px', fontWeight: tab === t.id ? 700 : 500 }}>

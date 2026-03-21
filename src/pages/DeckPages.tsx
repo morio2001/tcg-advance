@@ -11,7 +11,18 @@ interface DeckMainProps {
 
 export const DeckMain: React.FC<DeckMainProps> = ({ nav }) => (
   <div style={{ padding: '16px' }}>
-    <h1 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 16px', background: 'linear-gradient(135deg, #a064ff, #ff64a0)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>マイデッキ</h1>
+    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+      <h1 style={{ fontSize: '20px', fontWeight: 800, margin: 0, flex: 1, background: 'linear-gradient(135deg, #a064ff, #ff64a0)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>マイデッキ</h1>
+      <button
+        onClick={() => nav('deck-community')}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '5px',
+          background: 'rgba(160,100,255,0.1)', border: '1px solid rgba(160,100,255,0.25)',
+          borderRadius: '20px', padding: '6px 12px',
+          color: '#a064ff', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+        }}
+      >🃏 シェアレシピ</button>
+    </div>
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {MOCK_MY_DECKS.map(deck => (
         <div key={deck.id} onClick={() => nav('deck-detail', deck)} style={{
