@@ -141,4 +141,5 @@ export type ViewId =
   | 'user-profile'
   | 'public-profile'
   | 'ranking'
-  | 'search-public';
+  | 'search-public'
+  | 'profile-edit';

@@ -3,6 +3,7 @@ import type { FeedPost, SocialUser, Challenge } from '../types';
 import { MOCK_FEED_POSTS, MOCK_SOCIAL_USERS, MOCK_CHALLENGES, TCG_GAMES, MY_TCG_IDS } from '../data/mockData';
 import { IconBack } from '../components/Icons';
 import { SectionHeader } from '../components/Shared';
+import type { Profile } from '../hooks/useProfile';
 
 const CURRENT_SEASON = '2026-1Q';
 
@@ -118,10 +119,21 @@ const FeedCard: React.FC<FeedCardProps> = ({ post, isGGed, onGG, onUserClick, sh
 };
 
 /* ─── ProfileCard ─── */
-const ProfileCard: React.FC = () => {
+interface ProfileCardProps {
+  userProfile?: Profile | null;
+}
+
+const ProfileCard: React.FC<ProfileCardProps> = ({ userProfile }) => {
   const [mode, setMode] = useState<'lifetime' | 'season'>('lifetime');
   const stats = mode === 'lifetime' ? MY_STATS.lifetime : MY_STATS.season;
   const xpPct = (MY_STATS.lifetime.levelXp / MY_STATS.lifetime.levelXpMax) * 100;
+
+  // 本物のプロフィールがあればそちらを使う
+  const displayName = userProfile?.display_name || MY_PROFILE_INFO.name;
+  const avatarUrl = userProfile?.avatar_url;
+  const initial = displayName.charAt(0);
+  const favoriteShop = userProfile?.favorite_shop || MY_PROFILE_INFO.favoriteShop;
+  const userTcgIds = userProfile?.favorite_tcg?.length ? userProfile.favorite_tcg : MY_TCG_IDS;
 
   return (
     <div style={{
@@ -132,18 +144,25 @@ const ProfileCard: React.FC = () => {
       {/* ── Profile header ── */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'flex-start' }}>
         {/* Avatar */}
-        <div style={{
-          width: 50, height: 50, borderRadius: '50%', background: MY_PROFILE_INFO.avatarColor,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '20px', fontWeight: 700, color: '#fff', flexShrink: 0,
-          boxShadow: '0 0 12px rgba(0,224,224,0.25)',
-        }}>{MY_PROFILE_INFO.initial}</div>
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="" style={{
+            width: 50, height: 50, borderRadius: '50%', flexShrink: 0,
+            boxShadow: '0 0 12px rgba(0,224,224,0.25)', objectFit: 'cover',
+          }} />
+        ) : (
+          <div style={{
+            width: 50, height: 50, borderRadius: '50%', background: MY_PROFILE_INFO.avatarColor,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '20px', fontWeight: 700, color: '#fff', flexShrink: 0,
+            boxShadow: '0 0 12px rgba(0,224,224,0.25)',
+          }}>{initial}</div>
+        )}
 
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Name row + toggle */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
-            <span style={{ fontSize: '17px', fontWeight: 800, color: '#e8f4ff' }}>{MY_PROFILE_INFO.name}</span>
+            <span style={{ fontSize: '17px', fontWeight: 800, color: '#e8f4ff' }}>{displayName}</span>
             <div style={{ display: 'flex', gap: '3px' }}>
               {(['lifetime', 'season'] as const).map(m => (
                 <button key={m} onClick={() => setMode(m)} style={{
@@ -172,7 +191,7 @@ const ProfileCard: React.FC = () => {
 
           {/* TCG badges */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '4px' }}>
-            {MY_TCG_IDS.map(id => {
+            {userTcgIds.map(id => {
               const g = TCG_GAMES.find(g => g.id === id);
               if (!g) return null;
               return (
@@ -188,7 +207,7 @@ const ProfileCard: React.FC = () => {
 
           {/* 推しショップ */}
           <div style={{ fontSize: '10px', color: '#445566' }}>
-            🏪 <span style={{ color: '#7090a0' }}>{MY_PROFILE_INFO.favoriteShop}</span>
+            🏪 <span style={{ color: '#7090a0' }}>{favoriteShop}</span>
           </div>
         </div>
       </div>
@@ -394,9 +413,10 @@ interface HomeFeedPageProps {
   onUserClick: (userId: string) => void;
   goingEvents: Record<string, boolean>;
   reservedEvents: Record<string, boolean>;
+  userProfile?: Profile | null;
 }
 
-export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUserClick, goingEvents, reservedEvents }) => {
+export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUserClick, goingEvents, reservedEvents, userProfile }) => {
   const [slide, setSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const TOTAL_SLIDES = 2;
@@ -425,7 +445,7 @@ export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUse
           transform: `translateX(-${slide * 100}%)`,
           transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
         }}>
-          <div style={{ minWidth: '100%' }}><ProfileCard /></div>
+          <div style={{ minWidth: '100%' }}><ProfileCard userProfile={userProfile} /></div>
           <div style={{ minWidth: '100%' }}><CalendarCard goingEvents={goingEvents} reservedEvents={reservedEvents} /></div>
         </div>
       </div>

@@ -14,9 +14,16 @@ import { PublicProfilePage } from './pages/PublicProfilePage';
 import { RankingPage } from './pages/RankingPage';
 import { PublicSearchPage, SearchHubPage } from './pages/PublicSearchPage';
 import { CommunityDeckPage } from './pages/CommunityDeckPage';
+import { LoginPage } from './pages/LoginPage';
+import { ProfileEditPage } from './pages/ProfileEditPage';
+import { useAuth } from './hooks/useAuth';
+import { useProfile } from './hooks/useProfile';
 import { MOCK_FOLLOWING_IDS } from './data/mockData';
 
 export default function App() {
+  const { user, loading, signInWithGoogle, signOut } = useAuth();
+  const { profile, loading: profileLoading, updateProfile } = useProfile(user);
+
   const [tab, setTab] = useState<TabId>('home');
   const [view, setView] = useState<ViewId>('main');
   const [selEvent, setSelEvent] = useState<TcgEvent | RegisteredEvent | null>(null);
@@ -85,6 +92,36 @@ export default function App() {
     nav('user-profile', userId);
   };
 
+  // 未ログインならログイン画面を表示
+  if (!user) {
+    return <LoginPage onGoogleLogin={signInWithGoogle} loading={loading} />;
+  }
+
+  // プロフィール読み込み中
+  if (profileLoading) {
+    return <LoginPage onGoogleLogin={signInWithGoogle} loading={true} />;
+  }
+
+  // プロフィール未設定（初回ログイン）
+  if (profile && !profile.favorite_shop && (!profile.favorite_tcg || profile.favorite_tcg.length === 0)) {
+    return (
+      <div style={{
+        width: '100%', maxWidth: '430px', margin: '0 auto', height: '100vh',
+        display: 'flex', flexDirection: 'column',
+        background: 'linear-gradient(180deg, #0a0e1a 0%, #0d1220 50%, #0a0e1a 100%)',
+        color: '#e0e8f0', fontFamily: "'Noto Sans JP', -apple-system, sans-serif",
+        overflow: 'auto',
+      }}>
+        <ProfileEditPage
+          profile={profile}
+          onSave={updateProfile}
+          goBack={() => {}}
+          isFirstSetup
+        />
+      </div>
+    );
+  }
+
   const renderContent = () => {
     if (tab === 'home') {
       if (view === 'main') return (
@@ -94,6 +131,7 @@ export default function App() {
           onUserClick={handleUserClick}
           goingEvents={goingEvents}
           reservedEvents={reservedEvents}
+          userProfile={profile}
         />
       );
       if (view === 'user-profile' && selUserId) return (
@@ -135,8 +173,11 @@ export default function App() {
       if (view === 'deck-community') return <CommunityDeckPage goBack={goBack} />;
     }
     if (tab === 'account') {
-      if (view === 'main') return <AccountPage nav={nav} />;
+      if (view === 'main') return <AccountPage nav={nav} onSignOut={signOut} />;
       if (view === 'public-profile') return <PublicProfilePage goBack={goBack} />;
+      if (view === 'profile-edit' && profile) return (
+        <ProfileEditPage profile={profile} onSave={updateProfile} goBack={goBack} />
+      );
     }
     return null;
   };

@@ -4,3 +4,6 @@ tsconfig.tsbuildinfo
 desktop.ini
 *.ini
 .claude/
+.env
+.env.local
+.env*.local
