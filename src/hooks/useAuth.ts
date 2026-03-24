@@ -27,14 +27,19 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithOAuth = async (provider: 'google' | 'facebook' | 'twitter') => {
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      },
+      provider,
+      options: { redirectTo: window.location.origin },
     });
     if (error) console.error('Login error:', error.message);
+  };
+
+  const signInWithGoogle = () => signInWithOAuth('google');
+  const signInWithFacebook = () => signInWithOAuth('facebook');
+  const signInWithTwitter = () => signInWithOAuth('twitter');
+  const signInWithLine = () => {
+    window.location.href = 'https://lowyifjtngxhftnptlzk.supabase.co/functions/v1/line-auth';
   };
 
   const signOut = async () => {
@@ -42,5 +47,19 @@ export function useAuth() {
     if (error) console.error('Logout error:', error.message);
   };
 
-  return { user, session, loading, signInWithGoogle, signOut };
+  const linkGoogle = async () => {
+    await supabase.auth.linkIdentity({ provider: 'google', options: { redirectTo: window.location.origin } });
+  };
+
+  const linkTwitter = async () => {
+    await supabase.auth.linkIdentity({ provider: 'twitter', options: { redirectTo: window.location.origin } });
+  };
+
+  const linkLine = async () => {
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    const token = currentSession?.access_token || '';
+    window.location.href = `https://lowyifjtngxhftnptlzk.supabase.co/functions/v1/line-auth?mode=link&access_token=${token}`;
+  };
+
+  return { user, session, loading, signInWithGoogle, signInWithFacebook, signInWithTwitter, signInWithLine, signOut, linkGoogle, linkTwitter, linkLine };
 }

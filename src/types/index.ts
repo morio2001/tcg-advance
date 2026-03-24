@@ -142,4 +142,5 @@ export type ViewId =
   | 'public-profile'
   | 'ranking'
   | 'search-public'
-  | 'profile-edit';
+  | 'profile-edit'
+  | 'live-detail';

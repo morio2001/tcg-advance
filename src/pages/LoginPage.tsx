@@ -2,10 +2,13 @@ import React from 'react';
 
 interface LoginPageProps {
   onGoogleLogin: () => void;
+  onFacebookLogin?: () => void;
+  onTwitterLogin?: () => void;
+  onLineLogin?: () => void;
   loading?: boolean;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onGoogleLogin, loading }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onGoogleLogin, onFacebookLogin, onTwitterLogin, onLineLogin, loading }) => {
   if (loading) {
     return (
       <div style={{
@@ -84,16 +87,71 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onGoogleLogin, loading }) 
           Googleでログイン
         </button>
 
-        {/* 将来のLINEログインボタン用スペース */}
-        <div style={{
-          marginTop: '16px', padding: '14px 20px',
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px dashed rgba(255,255,255,0.1)',
-          borderRadius: '12px', textAlign: 'center',
-          color: '#445566', fontSize: '13px',
-        }}>
-          🟢 LINEログイン（近日追加予定）
-        </div>
+        {/* Twitterログインボタン */}
+        <button
+          onClick={onTwitterLogin}
+          style={{
+            width: '100%', padding: '14px 20px', marginTop: '12px',
+            background: '#000000', color: '#ffffff',
+            border: 'none', borderRadius: '12px',
+            fontSize: '15px', fontWeight: 700,
+            cursor: 'pointer', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', gap: '12px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+          X（Twitter）でログイン
+        </button>
+
+        {/* Facebookログインボタン */}
+        <button
+          onClick={onFacebookLogin}
+          style={{
+            width: '100%', padding: '14px 20px', marginTop: '12px',
+            background: '#1877F2', color: '#ffffff',
+            border: 'none', borderRadius: '12px',
+            fontSize: '15px', fontWeight: 700,
+            cursor: 'pointer', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', gap: '12px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Facebookでログイン
+        </button>
+
+        {/* LINEログインボタン */}
+        <button
+          onClick={onLineLogin}
+          style={{
+            width: '100%', padding: '14px 20px', marginTop: '12px',
+            background: '#06C755', color: '#ffffff',
+            border: 'none', borderRadius: '12px',
+            fontSize: '15px', fontWeight: 700,
+            cursor: 'pointer', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', gap: '12px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+            <path d="M12 2C6.477 2 2 6.145 2 11.243c0 4.557 3.582 8.364 8.438 9.111.328.07.775.216.888.495.102.255.067.653.033.91l-.144.864c-.044.255-.203 1.002.878.546 1.08-.456 5.837-3.44 7.964-5.89C21.522 15.47 22 13.43 22 11.243 22 6.145 17.523 2 12 2z"/>
+          </svg>
+          LINEでログイン
+        </button>
       </div>
 
       {/* フッター */}

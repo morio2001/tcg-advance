@@ -121,12 +121,20 @@ const FeedCard: React.FC<FeedCardProps> = ({ post, isGGed, onGG, onUserClick, sh
 /* ─── ProfileCard ─── */
 interface ProfileCardProps {
   userProfile?: Profile | null;
+  followingCount?: number;
+  receivedGGCount?: number;
+  receivedMannerCount?: number;
+  confirmedGGCount?: number;
+  followersCount?: number;
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ userProfile }) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ userProfile, followingCount = 0, followersCount = 0, receivedGGCount = 0, receivedMannerCount = 0, confirmedGGCount = 0 }) => {
   const [mode, setMode] = useState<'lifetime' | 'season'>('lifetime');
   const stats = mode === 'lifetime' ? MY_STATS.lifetime : MY_STATS.season;
-  const xpPct = (MY_STATS.lifetime.levelXp / MY_STATS.lifetime.levelXpMax) * 100;
+  const level = userProfile?.level ?? MY_STATS.lifetime.level;
+  const xp = userProfile?.xp ?? MY_STATS.lifetime.levelXp;
+  const xpMax = MY_STATS.lifetime.levelXpMax; // TODO: レベルに応じた最大XP計算
+  const xpPct = (xp / xpMax) * 100;
 
   // 本物のプロフィールがあればそちらを使う
   const displayName = userProfile?.display_name || MY_PROFILE_INFO.name;
@@ -180,9 +188,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ userProfile }) => {
 
           {/* LV + XP */}
           <div style={{ fontSize: '11px', color: '#00e0e0', fontWeight: 700, marginBottom: '3px' }}>
-            LV.{MY_STATS.lifetime.level}
+            LV.{level}
             <span style={{ fontSize: '9px', color: '#334455', fontWeight: 400, marginLeft: '6px' }}>
-              {MY_STATS.lifetime.levelXp}/{MY_STATS.lifetime.levelXpMax} XP
+              {xp}/{xpMax} XP
             </span>
           </div>
           <div style={{ height: '3px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', marginBottom: '6px', overflow: 'hidden', maxWidth: '140px' }}>
@@ -234,20 +242,43 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ userProfile }) => {
         ))}
       </div>
 
-      {/* ── Rankings row ── */}
+      {/* ── Follow & Rankings row ── */}
       <div style={{ display: 'flex', gap: '6px' }}>
+        <div style={{ flex: 1, padding: '3px 6px' }}>
+          <div style={{ fontSize: '9px', color: '#445566', marginBottom: '1px' }}>フォロー</div>
+          <div style={{ fontSize: '14px', fontWeight: 800, color: '#00e0e0', lineHeight: 1 }}>
+            {followingCount}
+          </div>
+        </div>
+        <div style={{ flex: 1, padding: '3px 6px' }}>
+          <div style={{ fontSize: '9px', color: '#445566', marginBottom: '1px' }}>フォロワー</div>
+          <div style={{ fontSize: '14px', fontWeight: 800, color: '#a064ff', lineHeight: 1 }}>
+            {followersCount}
+          </div>
+        </div>
         <div style={{ flex: 1, padding: '3px 6px' }}>
           <div style={{ fontSize: '9px', color: '#445566', marginBottom: '1px' }}>全国ランク</div>
           <div style={{ fontSize: '14px', fontWeight: 800, color: '#ffc800', lineHeight: 1 }}>
             #{stats.rankNational}<span style={{ fontSize: '9px', color: '#556677', fontWeight: 400 }}>位</span>
           </div>
         </div>
-        <div style={{ flex: 1, padding: '3px 6px' }}>
-          <div style={{ fontSize: '9px', color: '#445566', marginBottom: '1px' }}>エリアランク</div>
-          <div style={{ fontSize: '14px', fontWeight: 800, color: '#a064ff', lineHeight: 1 }}>
-            #{stats.rankArea}<span style={{ fontSize: '9px', color: '#556677', fontWeight: 400 }}>位</span>
+      </div>
+
+      {/* ── GG row ── */}
+      <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', marginBottom: '8px', marginTop: '4px' }} />
+      <div style={{ display: 'flex' }}>
+        {[
+          { label: 'GG成立', value: confirmedGGCount, color: '#00e0e0' },
+          { label: 'マナー', value: receivedMannerCount, color: '#a0c0ff' },
+        ].map(({ label, value, color }, i) => (
+          <div key={label} style={{
+            flex: 1, textAlign: 'center',
+            borderRight: i < 1 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+          }}>
+            <div style={{ fontSize: '16px', fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
+            <div style={{ fontSize: '9px', color: '#445566', marginTop: '2px' }}>{label}</div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -411,12 +442,17 @@ interface HomeFeedPageProps {
   ggPosts: Record<string, boolean>;
   onGG: (id: string) => void;
   onUserClick: (userId: string) => void;
+  receivedGGCount?: number;
+  receivedMannerCount?: number;
+  confirmedGGCount?: number;
   goingEvents: Record<string, boolean>;
   reservedEvents: Record<string, boolean>;
   userProfile?: Profile | null;
+  followingCount?: number;
+  followersCount?: number;
 }
 
-export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUserClick, goingEvents, reservedEvents, userProfile }) => {
+export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUserClick, goingEvents, reservedEvents, userProfile, followingCount = 0, followersCount = 0, receivedGGCount = 0, receivedMannerCount = 0, confirmedGGCount = 0 }) => {
   const [slide, setSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const TOTAL_SLIDES = 2;
@@ -445,7 +481,7 @@ export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUse
           transform: `translateX(-${slide * 100}%)`,
           transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
         }}>
-          <div style={{ minWidth: '100%' }}><ProfileCard userProfile={userProfile} /></div>
+          <div style={{ minWidth: '100%' }}><ProfileCard userProfile={userProfile} followingCount={followingCount} followersCount={followersCount} receivedGGCount={receivedGGCount} receivedMannerCount={receivedMannerCount} confirmedGGCount={confirmedGGCount} /></div>
           <div style={{ minWidth: '100%' }}><CalendarCard goingEvents={goingEvents} reservedEvents={reservedEvents} /></div>
         </div>
       </div>
@@ -465,18 +501,16 @@ export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUse
         ))}
       </div>
 
-      {/* Feed */}
-      <SectionHeader title="フォロー中の大会結果" count={MOCK_FEED_POSTS.length} />
-      <div style={{ marginBottom: '8px' }}>
-        {MOCK_FEED_POSTS.map(post => (
-          <FeedCard key={post.id} post={post} isGGed={ggPosts[post.id] ?? false} onGG={onGG} onUserClick={onUserClick} />
-        ))}
+      {/* Feed - coming soon */}
+      <div style={{
+        background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+        borderRadius: '12px', padding: '20px', textAlign: 'center', marginBottom: '12px',
+      }}>
+        <div style={{ fontSize: '20px', marginBottom: '6px' }}>🚧</div>
+        <div style={{ fontSize: '13px', color: '#445566' }}>フィード機能は準備中です</div>
       </div>
 
-      {/* Suggestions */}
-      <div style={{ marginBottom: '24px' }}>
-        <div style={{ fontSize: '12px', color: '#445566', marginBottom: '8px' }}>おすすめのプレイヤー</div>
-        {suggestions.map(user => (
+      {false && suggestions.map(user => (
           <div
             key={user.id}
             onClick={() => onUserClick(user.id)}
@@ -501,16 +535,16 @@ export const HomeFeedPage: React.FC<HomeFeedPageProps> = ({ ggPosts, onGG, onUse
             <span style={{ fontSize: '11px', color: '#00e0e0', fontWeight: 600 }}>→</span>
           </div>
         ))}
-      </div>
 
-      {/* Challenges */}
-      <SectionHeader
-        title="チャレンジ"
-        subtitle={`${completedCount}/${MOCK_CHALLENGES.length}クリア · クリアで経験値獲得！`}
-      />
-      {MOCK_CHALLENGES.map(ch => (
-        <ChallengeItem key={ch.id} challenge={ch} />
-      ))}
+      {/* Challenges - coming soon */}
+      <SectionHeader title="チャレンジ" subtitle="" />
+      <div style={{
+        background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+        borderRadius: '12px', padding: '20px', textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '20px', marginBottom: '6px' }}>🚧</div>
+        <div style={{ fontSize: '13px', color: '#445566' }}>チャレンジ機能は準備中です</div>
+      </div>
     </div>
   );
 };

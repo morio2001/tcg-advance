@@ -16,13 +16,19 @@ import { PublicSearchPage, SearchHubPage } from './pages/PublicSearchPage';
 import { CommunityDeckPage } from './pages/CommunityDeckPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProfileEditPage } from './pages/ProfileEditPage';
+import { LiveEventList, LiveEventDetail } from './pages/LiveEventPages';
 import { useAuth } from './hooks/useAuth';
 import { useProfile } from './hooks/useProfile';
-import { MOCK_FOLLOWING_IDS } from './data/mockData';
+import { useEvents, type EventWithShop } from './hooks/useEvents';
+import { useFollows } from './hooks/useFollows';
+import { useReactions } from './hooks/useReactions';
 
 export default function App() {
-  const { user, loading, signInWithGoogle, signOut } = useAuth();
+  const { user, loading, signInWithGoogle, signInWithFacebook, signInWithTwitter, signInWithLine, signOut, linkGoogle, linkTwitter, linkLine } = useAuth();
   const { profile, loading: profileLoading, updateProfile } = useProfile(user);
+  const { events: liveEvents, loading: eventsLoading } = useEvents();
+  const { followingIds, followingCount, followersCount, toggleFollow: realToggleFollow } = useFollows(user);
+  const { sentGGs, toggleGG: realToggleGG, hasGGed, receivedGGCount, receivedMannerCount, confirmedGGCount } = useReactions(user);
 
   const [tab, setTab] = useState<TabId>('home');
   const [view, setView] = useState<ViewId>('main');
@@ -32,11 +38,11 @@ export default function App() {
   const [checkedIn, setCheckedIn] = useState<Record<string, boolean>>({});
   const [tournamentEvent, setTournamentEvent] = useState<TcgEvent | null>(null);
   const [selUserId, setSelUserId] = useState<string | null>(null);
-  const [following, setFollowing] = useState<string[]>(MOCK_FOLLOWING_IDS);
   const [ggPosts, setGgPosts] = useState<Record<string, boolean>>({});
   const [goingEvents, setGoingEvents] = useState<Record<string, boolean>>({});
   const [reservedEvents, setReservedEvents] = useState<Record<string, boolean>>({});
   const [selSearchTab, setSelSearchTab] = useState<'player' | 'deck'>('player');
+  const [selLiveEvent, setSelLiveEvent] = useState<EventWithShop | null>(null);
 
   const nav = (v: ViewId, data?: any) => {
     setView(v);
@@ -46,6 +52,7 @@ export default function App() {
     else if (v === 'tournament') setTournamentEvent(data);
     else if (v === 'user-profile') setSelUserId(data);
     else if (v === 'search-public') setSelSearchTab((data as 'player' | 'deck') || 'player');
+    else if (v === 'live-detail') setSelLiveEvent(data);
   };
 
   const goBack = () => {
@@ -71,12 +78,11 @@ export default function App() {
   };
 
   const toggleFollow = (userId: string) => {
-    setFollowing(prev =>
-      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
-    );
+    realToggleFollow(userId);
   };
 
   const toggleGG = (postId: string) => {
+    // モックフィードのGG（今はローカルstate、将来的にreactionsに移行）
     setGgPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
   };
 
@@ -94,7 +100,7 @@ export default function App() {
 
   // 未ログインならログイン画面を表示
   if (!user) {
-    return <LoginPage onGoogleLogin={signInWithGoogle} loading={loading} />;
+    return <LoginPage onGoogleLogin={signInWithGoogle} onFacebookLogin={signInWithFacebook} onTwitterLogin={signInWithTwitter} onLineLogin={signInWithLine} loading={loading} />;
   }
 
   // プロフィール読み込み中
@@ -122,6 +128,19 @@ export default function App() {
     );
   }
 
+  const UnderConstruction = ({ label }: { label: string }) => (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      height: '60vh', gap: '16px', padding: '32px',
+    }}>
+      <div style={{ fontSize: '48px' }}>🚧</div>
+      <div style={{ fontSize: '18px', fontWeight: 700, color: '#e0e8f0' }}>{label}</div>
+      <div style={{ fontSize: '13px', color: '#556677', textAlign: 'center', lineHeight: 1.6 }}>
+        現在開発中です。<br />もうしばらくお待ちください。
+      </div>
+    </div>
+  );
+
   const renderContent = () => {
     if (tab === 'home') {
       if (view === 'main') return (
@@ -132,51 +151,42 @@ export default function App() {
           goingEvents={goingEvents}
           reservedEvents={reservedEvents}
           userProfile={profile}
+          followingCount={followingCount}
+          followersCount={followersCount}
+          receivedGGCount={receivedGGCount}
+          receivedMannerCount={receivedMannerCount}
+          confirmedGGCount={confirmedGGCount}
         />
       );
       if (view === 'user-profile' && selUserId) return (
         <UserProfilePage
           userId={selUserId}
-          following={following}
+          following={followingIds}
           ggPosts={ggPosts}
           onGG={toggleGG}
           onFollow={toggleFollow}
           goBack={goBack}
         />
       );
-      if (view === 'ranking') return <RankingPage goBack={goBack} />;
     }
     if (tab === 'search') {
-      if (view === 'main') return <SearchHubPage nav={nav} />;
-      if (view === 'search-public') return <PublicSearchPage goBack={goBack} onUserClick={id => nav('user-profile', id)} initialTab={selSearchTab} />;
-      if (view === 'search') return <EventSearchPage nav={nav} goBack={goBack} />;
-      if (view === 'detail') return <EventDetailPage event={selEvent} goBack={goBack} doCheckIn={doCheckIn} checkedIn={checkedIn} nav={nav} goingEvents={goingEvents} onToggleGoing={toggleGoing} reservedEvents={reservedEvents} onToggleReserved={toggleReserved} />;
-      if (view === 'tournament') return <TournamentPage event={tournamentEvent} goBack={goBack} />;
-      if (view === 'user-profile' && selUserId) return (
-        <UserProfilePage userId={selUserId} following={following} ggPosts={ggPosts} onGG={toggleGG} onFollow={toggleFollow} goBack={goBack} />
-      );
+      return <UnderConstruction label="検索" />;
     }
     if (tab === 'events') {
-      if (view === 'main') return <EventsMain nav={nav} checkedIn={checkedIn} />;
-      if (view === 'search') return <EventSearchPage nav={nav} goBack={goBack} />;
-      if (view === 'detail') return <EventDetailPage event={selEvent} goBack={goBack} doCheckIn={doCheckIn} checkedIn={checkedIn} nav={nav} goingEvents={goingEvents} onToggleGoing={toggleGoing} reservedEvents={reservedEvents} onToggleReserved={toggleReserved} />;
-      if (view === 'tournament') return <TournamentPage event={tournamentEvent} goBack={goBack} />;
+      if (view === 'main') return <LiveEventList events={liveEvents} loading={eventsLoading} onEventClick={(e) => nav('live-detail', e)} />;
+      if (view === 'live-detail' && selLiveEvent) return <LiveEventDetail event={selLiveEvent} userId={user.id} goBack={goBack} />;
     }
     if (tab === 'battle') {
-      if (view === 'main') return <BattleMain nav={nav} />;
-      if (view === 'history-detail') return <HistoryDetailPage history={selHistory} goBack={goBack} />;
+      return <UnderConstruction label="戦績" />;
     }
     if (tab === 'deck') {
-      if (view === 'main') return <DeckMain nav={nav} />;
-      if (view === 'deck-detail') return <DeckDetailPage deck={selDeck} goBack={goBack} nav={nav} />;
-      if (view === 'deck-edit') return <DeckEditPage deck={selDeck} goBack={goBackToDeckDetail} />;
-      if (view === 'deck-community') return <CommunityDeckPage goBack={goBack} />;
+      return <UnderConstruction label="デッキ" />;
     }
     if (tab === 'account') {
       if (view === 'main') return <AccountPage nav={nav} onSignOut={signOut} />;
       if (view === 'public-profile') return <PublicProfilePage goBack={goBack} />;
       if (view === 'profile-edit' && profile) return (
-        <ProfileEditPage profile={profile} onSave={updateProfile} goBack={goBack} />
+        <ProfileEditPage profile={profile} onSave={updateProfile} goBack={goBack} user={user} onLinkGoogle={linkGoogle} onLinkTwitter={linkTwitter} onLinkLine={linkLine} />
       );
     }
     return null;
