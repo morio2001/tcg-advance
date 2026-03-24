@@ -1,4 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+
+// アプリ内ブラウザ（WebView）の検出
+function isInAppBrowser(): boolean {
+  const ua = navigator.userAgent || '';
+  return /Line|FBAN|FBAV|Instagram|Twitter|Snapchat|MicroMessenger|WebView|wv/.test(ua)
+    || (/(iPhone|iPod|iPad)/.test(ua) && !/Safari/.test(ua));
+}
 
 interface LoginPageProps {
   onGoogleLogin: () => void;
@@ -9,6 +16,9 @@ interface LoginPageProps {
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onGoogleLogin, onFacebookLogin, onTwitterLogin, onLineLogin, loading }) => {
+  const [inAppBrowser, setInAppBrowser] = useState(false);
+  useEffect(() => { setInAppBrowser(isInAppBrowser()); }, []);
+
   if (loading) {
     return (
       <div style={{
@@ -52,6 +62,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onGoogleLogin, onFacebookL
           カードゲーマーのためのSNS
         </p>
       </div>
+
+      {/* アプリ内ブラウザ警告 */}
+      {inAppBrowser && (
+        <div style={{
+          width: '100%', maxWidth: '300px', marginBottom: '20px',
+          background: 'rgba(255,200,0,0.1)', border: '1px solid rgba(255,200,0,0.3)',
+          borderRadius: '12px', padding: '12px 16px',
+          fontSize: '12px', color: '#ffcc00', lineHeight: 1.6, textAlign: 'center',
+        }}>
+          ⚠️ アプリ内ブラウザではGoogleログインが使えません。<br />
+          右下の「…」→「ブラウザで開く」でChromeまたはSafariから開いてください。
+        </div>
+      )}
 
       {/* ログインボタンエリア */}
       <div style={{ width: '100%', maxWidth: '300px' }}>
