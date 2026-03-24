@@ -179,7 +179,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onGoogleLogin, onFacebookL
 
       {/* フッター */}
       <div style={{
-        position: 'absolute', bottom: '32px',
+        marginTop: '24px',
         fontSize: '11px', color: '#334455', textAlign: 'center',
       }}>
         ログインすることで利用規約に同意したものとします
