@@ -7,3 +7,12 @@ desktop.ini
 .env
 .env.local
 .env*.local
+
+# Unrelated sub-project (invoice automation system)
+invoice-automation/
+
+# Generated artifacts
+TCGアドバンス_事業概要書.docx
+
+# Local handoff notes
+handoff_*.md
