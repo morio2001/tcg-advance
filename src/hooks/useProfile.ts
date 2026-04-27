@@ -26,18 +26,23 @@ export function useProfile(user: User | null) {
       return;
     }
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-    if (error) {
-      console.error('プロフィール取得エラー:', error.message);
-    } else {
-      setProfile(data);
+      if (error) {
+        console.error('プロフィール取得エラー:', error.message);
+      } else {
+        setProfile(data);
+      }
+    } catch (e) {
+      console.error('プロフィール取得例外:', e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // プロフィールを更新
