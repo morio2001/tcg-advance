@@ -1,9 +1,8 @@
 import React from 'react';
-import type { Match, Tournament } from '../types';
-import { C } from '../theme';
+import type { Match, MatchStatus, Tournament } from '../types';
 import { participant, slotName } from '../lib/bracket';
-import { clock, remainingMs } from '../lib/format';
-import { Icon, ICONS, StatusPill, Tag } from '../components/ui';
+import { clock, remainingMs, totalMs } from '../lib/format';
+import { Icon, ICONS } from '../components/ui';
 
 interface Props {
   match: Match;
@@ -13,47 +12,54 @@ interface Props {
   compact?: boolean;
 }
 
-const PlayerRow: React.FC<{
-  m: Match;
-  t: Tournament;
-  side: 'a' | 'b';
-}> = ({ m, t, side }) => {
+// Light "ops board" card palette. The page stays dark (黒基調); cards are white
+// so result reads at a glance: winner = bold red text, loser = grey, no color masks.
+const L = {
+  cardBg: '#ffffff',
+  text: '#1b2330',
+  textDim: '#6b7686',
+  faint: '#9aa3af',
+  border: '#d7dee8',
+  divider: '#e7ecf2',
+  win: '#d81e3f',
+  lose: '#9aa3af',
+  tableBg: '#1b2330',
+  stream: '#c81d8f',
+  timerLive: '#1769d6',
+  timerOver: '#e8590c',
+  liveFrame: '#1b2330',
+};
+
+const STATUS_CHIP: Record<MatchStatus, { label: string; color: string; bg: string }> = {
+  pending: { label: '未確定', color: '#8a93a3', bg: '#eef1f5' },
+  ready: { label: '開始前', color: '#2f6feb', bg: '#eaf1ff' },
+  live: { label: '対戦中', color: '#1769d6', bg: '#e7f0ff' },
+  overtime: { label: '延長中', color: '#e8590c', bg: '#fff0e6' },
+  done: { label: '終了', color: '#8a93a3', bg: '#eef1f5' },
+  void: { label: '不戦', color: '#aab2bf', bg: '#f0f2f5' },
+};
+
+const PlayerRow: React.FC<{ m: Match; t: Tournament; side: 'a' | 'b' }> = ({ m, t, side }) => {
   const slot = side === 'a' ? m.slots[0] : m.slots[1];
   const p = participant(t, slot.participantId);
+  const decided = m.status === 'done' && !m.isBye;
   const isWinner = m.winner === side;
-  const isLoser = m.winner !== null && m.winner !== side && !m.isBye;
+  const isLoser = decided && !isWinner;
   const score = side === 'a' ? m.scoreA : m.scoreB;
 
+  const nameColor = !p ? L.faint : isWinner ? L.win : isLoser ? L.lose : L.text;
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '6px 8px',
-        borderRadius: 8,
-        background: isWinner ? 'rgba(0,214,138,0.1)' : 'transparent',
-        opacity: isLoser ? 0.5 : 1,
-      }}
-    >
-      <span
-        style={{
-          fontSize: 10,
-          fontWeight: 800,
-          color: C.textFaint,
-          width: 20,
-          textAlign: 'center',
-          flexShrink: 0,
-        }}
-      >
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px' }}>
+      <span style={{ fontSize: 10, fontWeight: 800, color: L.faint, width: 18, textAlign: 'center', flexShrink: 0 }}>
         {p ? p.seed : '–'}
       </span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontSize: 13,
+            fontSize: 13.5,
             fontWeight: isWinner ? 800 : 600,
-            color: p ? (isWinner ? C.win : C.text) : C.textFaint,
+            color: nameColor,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -62,17 +68,16 @@ const PlayerRow: React.FC<{
           {p ? p.name : slotName(slot, t)}
         </div>
         {p?.deck && (
-          <div style={{ fontSize: 10, color: C.textFaint, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <div style={{ fontSize: 10, color: isLoser ? L.faint : L.textDim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {p.deck}
           </div>
         )}
       </div>
-      {(m.status === 'done' && !m.isBye) && (
-        <span style={{ fontSize: 16, fontWeight: 800, color: isWinner ? C.win : C.textFaint, width: 18, textAlign: 'center' }}>
+      {decided && (
+        <span style={{ fontSize: 17, fontWeight: 800, color: isWinner ? L.win : L.lose, width: 16, textAlign: 'center' }}>
           {score}
         </span>
       )}
-      {isWinner && <Icon d={ICONS.trophy} size={13} color={C.win} />}
     </div>
   );
 };
@@ -80,61 +85,84 @@ const PlayerRow: React.FC<{
 export const MatchCard: React.FC<Props> = ({ match: m, t, now, onClick }) => {
   const rem = remainingMs(m, now);
   const over = m.status === 'overtime' || (m.status === 'live' && rem < 0);
-  const liveColor = over ? C.overtime : C.live;
+  const live = m.status === 'live' || over;
+  const done = m.status === 'done' || m.status === 'void';
+  const chip = STATUS_CHIP[over ? 'overtime' : m.status];
+
+  // border: status only (NOT stream). live = bold frame, otherwise normal.
+  const border = live
+    ? `2.5px solid ${over ? L.timerOver : L.liveFrame}`
+    : `1px solid ${L.border}`;
+
+  const showTimer = live || m.status === 'ready' || m.status === 'pending';
+  const showFooter = (showTimer && !done) || m.penalties.length > 0;
 
   return (
     <div
       onClick={onClick}
       style={{
-        background: C.panel,
-        border: `1px solid ${m.isStream ? `${C.stream}66` : C.border}`,
-        borderRadius: 13,
-        padding: 10,
+        background: L.cardBg,
+        border,
+        borderRadius: 12,
+        padding: live ? 8.5 : 10,
         cursor: onClick ? 'pointer' : 'default',
         position: 'relative',
-        boxShadow: m.status === 'live' || over ? `0 0 0 1px ${liveColor}44` : undefined,
+        overflow: 'hidden',
+        color: L.text,
       }}
     >
       {/* header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
         {m.table && (
-          <span style={{ fontSize: 11, fontWeight: 800, color: C.accent, background: 'rgba(0,224,224,0.12)', padding: '2px 7px', borderRadius: 6 }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', background: L.tableBg, padding: '2px 8px', borderRadius: 6 }}>
             卓{m.table}
           </span>
         )}
-        <span style={{ fontSize: 11, color: C.textDim, fontWeight: 700 }}>{m.label}</span>
+        <span style={{ fontSize: 11, color: L.textDim, fontWeight: 700 }}>{m.label}</span>
         <div style={{ flex: 1 }} />
         {m.isStream && (
-          <Tag color={C.stream}>
-            <Icon d={ICONS.monitor} size={10} color={C.stream} /> 配信
-          </Tag>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, fontWeight: 800, color: '#fff', background: L.stream, padding: '2px 7px', borderRadius: 999 }}>
+            <Icon d={ICONS.monitor} size={10} color="#fff" /> 配信
+          </span>
         )}
-        <StatusPill status={m.status} />
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10.5, fontWeight: 800, color: chip.color, background: chip.bg, padding: '2px 8px', borderRadius: 999 }}>
+          {live && <span style={{ width: 6, height: 6, borderRadius: '50%', background: chip.color, animation: 'toBlink 1.1s infinite' }} />}
+          {chip.label}
+        </span>
       </div>
 
       {/* players */}
       <PlayerRow m={m} t={t} side="a" />
-      <div style={{ height: 1, background: C.border, margin: '2px 8px' }} />
+      <div style={{ height: 1, background: L.divider, margin: '0 8px' }} />
       <PlayerRow m={m} t={t} side="b" />
 
-      {/* footer: timer / penalties */}
-      {(m.status === 'live' || over || m.penalties.length > 0 || m.streamNote) && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 7, paddingTop: 7, borderTop: `1px solid ${C.border}` }}>
-          {(m.status === 'live' || over) && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 14, fontWeight: 800, color: liveColor, fontVariantNumeric: 'tabular-nums' }}>
-              <Icon d={ICONS.clock} size={13} color={liveColor} />
+      {/* footer: timer (prominent) + penalties */}
+      {showFooter && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, paddingTop: 6, borderTop: `1px solid ${L.divider}` }}>
+          {live ? (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 18, fontWeight: 800, color: over ? L.timerOver : L.timerLive, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+              <Icon d={ICONS.clock} size={15} color={over ? L.timerOver : L.timerLive} />
               {clock(rem)}
-              {m.extensionMin > 0 && <span style={{ fontSize: 10, color: C.warn }}>+{m.extensionMin}</span>}
+              {m.extensionMin > 0 && <span style={{ fontSize: 10, color: L.timerOver, fontWeight: 700 }}>延長+{m.extensionMin}</span>}
             </span>
-          )}
-          {m.streamNote && <span style={{ fontSize: 10, color: C.stream }}>{m.streamNote}</span>}
+          ) : !done ? (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 600, color: L.faint, fontVariantNumeric: 'tabular-nums' }}>
+              <Icon d={ICONS.clock} size={12} color={L.faint} />
+              {clock(totalMs(m))} <span style={{ fontSize: 10 }}>予定</span>
+            </span>
+          ) : null}
           <div style={{ flex: 1 }} />
           {m.penalties.length > 0 && (
-            <Tag color={C.warn}>
-              <Icon d={ICONS.alert} size={10} color={C.warn} /> {m.penalties.length}
-            </Tag>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10.5, fontWeight: 800, color: '#b5641a', background: '#fff3e0', padding: '2px 7px', borderRadius: 999 }}>
+              <Icon d={ICONS.alert} size={10} color="#b5641a" /> {m.penalties.length}
+            </span>
           )}
         </div>
+      )}
+
+      {/* done: cover the whole card with a light grey wash */}
+      {done && (
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(150,160,175,0.28)', pointerEvents: 'none' }} />
       )}
     </div>
   );

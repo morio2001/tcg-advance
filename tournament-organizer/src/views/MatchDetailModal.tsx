@@ -148,7 +148,7 @@ export const MatchDetailModal: React.FC<Props> = ({ match: m, t, now, onClose })
       <Section title="結果入力">
         {m.status === 'done' && !m.isBye ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Tag color={C.win}>
+            <Tag color="#ff4d63">
               勝者: {(m.winner === 'a' ? pa : pb)?.name} ({m.scoreA}-{m.scoreB})
             </Tag>
             <Button variant="danger" size="sm" onClick={() => dispatch({ type: 'CLEAR_RESULT', matchId: m.id })}>
@@ -172,9 +172,9 @@ export const MatchDetailModal: React.FC<Props> = ({ match: m, t, now, onClose })
                       cursor: 'pointer',
                       fontWeight: 700,
                       fontSize: 13,
-                      border: `2px solid ${sel ? C.win : C.border}`,
-                      background: sel ? 'rgba(0,214,138,0.14)' : 'rgba(255,255,255,0.04)',
-                      color: sel ? C.win : C.text,
+                      border: `2px solid ${sel ? '#ff4d63' : C.border}`,
+                      background: sel ? 'rgba(255,77,99,0.16)' : 'rgba(255,255,255,0.04)',
+                      color: sel ? '#ff4d63' : C.text,
                     }}
                   >
                     {p?.name} 勝利
