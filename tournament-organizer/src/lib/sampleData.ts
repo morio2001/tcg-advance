@@ -1,5 +1,6 @@
 import type { ActivityEvent, Appearance, Match, Participant, Tournament } from '../types';
 import { generateSingleElim, resolveAll } from './bracket';
+import { SAMURAI_AVATARS } from './sampleAvatars';
 
 const NAMES: [string, string, string, Appearance][] = [
   ['カミヤ ソウタ', 'リザードンex', '横浜CL', 'ok'],
@@ -28,6 +29,7 @@ function buildParticipants(): Participant[] {
     deck,
     affiliation,
     appearance,
+    photo: SAMURAI_AVATARS[i], // first 5 players get sample portraits
   }));
 }
 

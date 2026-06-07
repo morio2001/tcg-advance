@@ -8,6 +8,7 @@ interface BracketProps {
   t: Tournament;
   now: number;
   onMatchClick?: (id: string) => void;
+  onMatchGear?: (id: string) => void;
   selectedId?: string | null;
   scale?: number; // applied via CSS zoom (1 = board, 1.25 = monitor)
 }
@@ -41,13 +42,20 @@ const Connector: React.FC<{ topBold: boolean; bottomBold: boolean }> = ({ topBol
   );
 };
 
-export const Bracket: React.FC<BracketProps> = ({ t, now, onMatchClick, selectedId, scale = 1 }) => {
+export const Bracket: React.FC<BracketProps> = ({ t, now, onMatchClick, onMatchGear, selectedId, scale = 1 }) => {
   const mr = maxRound(t);
   const main = t.matches.filter((m) => m.bracket === 'main');
   const third = t.matches.find((m) => m.bracket === 'third');
 
   const card = (m: Match) => (
-    <MatchCard match={m} t={t} now={now} selected={selectedId === m.id} onClick={onMatchClick ? () => onMatchClick(m.id) : undefined} />
+    <MatchCard
+      match={m}
+      t={t}
+      now={now}
+      selected={selectedId === m.id}
+      onClick={onMatchClick ? () => onMatchClick(m.id) : undefined}
+      onGear={onMatchGear ? () => onMatchGear(m.id) : undefined}
+    />
   );
 
   const columns: React.ReactNode[] = [];

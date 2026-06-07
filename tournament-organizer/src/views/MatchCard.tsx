@@ -10,6 +10,7 @@ interface Props {
   t: Tournament;
   now: number;
   onClick?: () => void;
+  onGear?: () => void;
   selected?: boolean;
 }
 
@@ -77,7 +78,7 @@ const PlayerRow: React.FC<{ m: Match; t: Tournament; side: 'a' | 'b' }> = ({ m, 
   );
 };
 
-export const MatchCard: React.FC<Props> = ({ match: m, t, now, onClick, selected }) => {
+export const MatchCard: React.FC<Props> = ({ match: m, t, now, onClick, onGear, selected }) => {
   const rem = remainingMs(m, now);
   const over = m.status === 'overtime' || (m.status === 'live' && rem < 0);
   const live = m.status === 'live' || over;
@@ -119,6 +120,15 @@ export const MatchCard: React.FC<Props> = ({ match: m, t, now, onClick, selected
           </Chip>
         )}
         {m.penalties.length > 0 && <Chip color="#b5641a" bg="#fff3e0">⚠{m.penalties.length}</Chip>}
+        {onGear && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onGear(); }}
+            title="操作 / ステータス変更"
+            style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13, lineHeight: 1, padding: '0 1px', color: L.textDim }}
+          >
+            ⚙
+          </button>
+        )}
       </div>
 
       {/* row 2: start time (kanji) / remaining (MM:SS) */}
