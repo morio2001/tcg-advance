@@ -15,6 +15,9 @@ export type MatchStatus =
 
 export type PenaltyType = 'caution' | 'warning' | 'game_loss' | 'match_loss' | 'dq';
 
+/** Pre-stream appearance check (clothing / tattoos / other-IP apparel). Per person. */
+export type Appearance = 'ok' | 'ng' | 'pending';
+
 export type SlotSource =
   | { kind: 'seed'; participantId: string | null } // null = bye
   | { kind: 'winner'; matchId: string }
@@ -32,6 +35,7 @@ export interface Participant {
   seed: number;        // 1-based seed
   deck?: string;       // archetype, used for broadcast lower-thirds
   affiliation?: string; // shop / region / team
+  appearance: Appearance; // pre-stream appearance check, managed in the roster
 }
 
 export interface Penalty {
@@ -70,13 +74,33 @@ export interface Match {
   penalties: Penalty[];
 }
 
-export interface Announcement {
+/** Who produced an event. Set at "join" time (name + role), saved per browser. */
+export interface EventSource {
+  name: string;
+  role: Role;
+}
+
+export type EventKind =
+  | 'announcement' // 本部からのお知らせ（公開先つき・固定可）
+  | 'status'       // 開始 / 停止 / 一斉開始
+  | 'result'       // 結果確定 / 取消
+  | 'extension'    // 延長付与
+  | 'penalty'      // ペナルティ記録
+  | 'stream'       // 配信卓フラグ変更
+  | 'table'        // 卓割当変更
+  | 'appearance'   // アピアランスチェック更新
+  | 'message';     // スタッフの自由コメント（スレッド投稿）
+
+/** A single entry in the shared activity log / threads. */
+export interface ActivityEvent {
   id: string;
   at: number;
-  by: string;
+  kind: EventKind;
+  source: EventSource;
+  matchId: string | null;     // attached match (thread) or null = global
   body: string;
-  audiences: Role[];   // which views should surface this
-  pinned: boolean;
+  audiences?: Role[];         // announcements: who should see it
+  pinned?: boolean;           // announcements: pin to top / monitor ticker
 }
 
 export interface Tournament {
@@ -90,6 +114,6 @@ export interface Tournament {
   hasThirdPlace: boolean;
   participants: Participant[];
   matches: Match[];
-  announcements: Announcement[];
+  events: ActivityEvent[];
   createdAt: number;
 }

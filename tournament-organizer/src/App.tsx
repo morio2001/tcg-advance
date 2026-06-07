@@ -1,42 +1,33 @@
 import React, { useState } from 'react';
-import type { Role } from './types';
 import { C } from './theme';
+import { ROLE_COLOR, ROLE_LABEL } from './roles';
 import { StoreProvider, useStore } from './store';
 import { Button, Icon, ICONS } from './components/ui';
-import { ROLE_LABEL } from './views/AnnouncementsPanel';
+import { JoinGate } from './views/JoinGate';
 import { SetupView } from './views/SetupView';
-import { AdminDashboard } from './views/AdminDashboard';
-import { BracketView } from './views/BracketView';
+import { BoardView } from './views/BoardView';
+import { RosterView } from './views/RosterView';
 import { ShareView } from './views/ShareView';
-import { AudienceView } from './views/AudienceView';
 import { PresentationView } from './views/PresentationView';
 
-type AdminTab = 'dashboard' | 'bracket' | 'share';
-
-const ROLES: Role[] = ['admin', 'floor', 'broadcast', 'stage', 'client'];
-const ROLE_DESC: Record<Role, string> = {
-  admin: '本部 — 唯一の更新者',
-  floor: 'フロアスタッフ — 担当卓',
-  broadcast: '配信 — 配信卓 / テロップ',
-  stage: 'ステージ進行 — タイムライン',
-  client: 'クライアント — 進捗サマリー',
-};
+type Tab = 'board' | 'roster' | 'share';
 
 const Shell: React.FC = () => {
   const { state, dispatch } = useStore();
-  const [tab, setTab] = useState<AdminTab>('dashboard');
+  const [tab, setTab] = useState<Tab>('board');
   const [presenting, setPresenting] = useState(false);
-  const t = state.tournament;
+  const [editingId, setEditingId] = useState(false);
 
-  if (!t) return <Page><SetupView /></Page>;
+  const { identity, tournament: t } = state;
 
+  if (!identity || editingId) {
+    return <JoinGate initial={identity} onDone={() => setEditingId(false)} />;
+  }
+  if (!t) return <div style={{ minHeight: '100vh', padding: '24px 20px 60px' }}><SetupView /></div>;
   if (presenting) return <PresentationView t={t} onExit={() => setPresenting(false)} />;
-
-  const role = state.role;
 
   return (
     <div style={{ minHeight: '100vh' }}>
-      {/* top bar */}
       <header
         style={{
           position: 'sticky',
@@ -53,43 +44,26 @@ const Shell: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
             <Icon d={ICONS.trophy} size={20} color={C.accent} />
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 360 }}>
-                {t.name}
-              </div>
+              <div style={{ fontSize: 14, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 340 }}>{t.name}</div>
               <div style={{ fontSize: 11, color: C.textDim }}>{t.venue || '会場未設定'}</div>
             </div>
           </div>
 
           <div style={{ flex: 1 }} />
 
-          {/* role switcher */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 11, color: C.textFaint }}>表示:</span>
-            <div style={{ display: 'flex', background: 'rgba(0,0,0,0.04)', borderRadius: 10, padding: 3, gap: 2 }}>
-              {ROLES.map((r) => (
-                <button
-                  key={r}
-                  onClick={() => dispatch({ type: 'SET_ROLE', role: r })}
-                  title={ROLE_DESC[r]}
-                  style={{
-                    padding: '6px 11px',
-                    borderRadius: 8,
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    background: role === r ? (r === 'admin' ? `linear-gradient(135deg, ${C.accent}, ${C.accentDeep})` : 'rgba(0,0,0,0.07)') : 'transparent',
-                    color: role === r ? (r === 'admin' ? '#fff' : C.text) : C.textDim,
-                  }}
-                >
-                  {ROLE_LABEL[r]}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* identity */}
+          <button
+            onClick={() => setEditingId(true)}
+            title="表示名・ロールを変更"
+            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 11px', borderRadius: 999, cursor: 'pointer', border: `1px solid ${C.border}`, background: '#fff' }}
+          >
+            <span style={{ width: 9, height: 9, borderRadius: '50%', background: ROLE_COLOR[identity.role] }} />
+            <span style={{ fontSize: 12, fontWeight: 800, color: C.text }}>{identity.name}</span>
+            <span style={{ fontSize: 10, color: C.textDim }}>{ROLE_LABEL[identity.role]}</span>
+          </button>
 
           <Button variant="ghost" size="sm" onClick={() => setPresenting(true)}>
-            <Icon d={ICONS.monitor} size={13} /> モニター表示
+            <Icon d={ICONS.monitor} size={13} /> モニター
           </Button>
           <Button
             variant="subtle"
@@ -102,52 +76,42 @@ const Shell: React.FC = () => {
           </Button>
         </div>
 
-        {/* admin sub-tabs */}
-        {role === 'admin' && (
-          <div style={{ display: 'flex', gap: 4, marginTop: 10 }}>
-            {([
-              ['dashboard', 'ダッシュボード', ICONS.grid],
-              ['bracket', 'トーナメント表', ICONS.table],
-              ['share', '共有スナップショット', ICONS.copy],
-            ] as [AdminTab, string, string][]).map(([key, label, icon]) => (
-              <button
-                key={key}
-                onClick={() => setTab(key)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '7px 13px',
-                  borderRadius: 9,
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: 12.5,
-                  fontWeight: 700,
-                  background: tab === key ? 'rgba(23,105,214,0.12)' : 'transparent',
-                  color: tab === key ? C.accent : C.textDim,
-                }}
-              >
-                <Icon d={icon} size={13} color={tab === key ? C.accent : C.textDim} /> {label}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* tabs */}
+        <div style={{ display: 'flex', gap: 4, marginTop: 10 }}>
+          {([
+            ['board', '進行ボード', ICONS.grid],
+            ['roster', '選手名簿', ICONS.users],
+            ['share', '共有スナップショット', ICONS.copy],
+          ] as [Tab, string, string][]).map(([key, label, icon]) => (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '7px 13px',
+                borderRadius: 9,
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 12.5,
+                fontWeight: 700,
+                background: tab === key ? 'rgba(23,105,214,0.12)' : 'transparent',
+                color: tab === key ? C.accent : C.textDim,
+              }}
+            >
+              <Icon d={icon} size={13} color={tab === key ? C.accent : C.textDim} /> {label}
+            </button>
+          ))}
+        </div>
       </header>
 
-      <main style={{ padding: '18px 20px 60px', maxWidth: 1400, margin: '0 auto' }}>
-        {role === 'admin' ? (
-          tab === 'dashboard' ? <AdminDashboard t={t} /> : tab === 'bracket' ? <BracketView t={t} /> : <ShareView t={t} />
-        ) : (
-          <AudienceView t={t} role={role} />
-        )}
+      <main style={{ padding: '18px 20px 40px', maxWidth: 1480, margin: '0 auto' }}>
+        {tab === 'board' ? <BoardView t={t} /> : tab === 'roster' ? <RosterView t={t} /> : <ShareView t={t} />}
       </main>
     </div>
   );
 };
-
-const Page: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div style={{ minHeight: '100vh', padding: '24px 20px 60px' }}>{children}</div>
-);
 
 const App: React.FC = () => (
   <StoreProvider>

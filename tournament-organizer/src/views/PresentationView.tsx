@@ -14,7 +14,7 @@ export const PresentationView: React.FC<{ t: Tournament; onExit: () => void }> =
   const champ = champion(t);
 
   const liveCount = t.matches.filter((m) => m.status === 'live' || m.status === 'overtime').length;
-  const pinned = t.announcements.filter((a) => a.pinned);
+  const pinned = t.events.filter((e) => e.kind === 'announcement' && e.pinned);
 
   const toggleFs = async () => {
     try {

@@ -80,5 +80,6 @@ export function toParticipants(rows: ParsedRow[]): Participant[] {
     seed: i + 1,
     deck: r.deck,
     affiliation: r.affiliation,
+    appearance: 'pending' as const,
   }));
 }

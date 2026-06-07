@@ -23,6 +23,12 @@ export function hhmm(epoch: number): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+/** Clock time with kanji units, e.g. "16時20分" — visually distinct from MM:SS countdowns. */
+export function hhmmKanji(epoch: number): string {
+  const d = new Date(epoch);
+  return `${d.getHours()}時${String(d.getMinutes()).padStart(2, '0')}分`;
+}
+
 export function relTime(epoch: number, now: number): string {
   const diff = Math.round((now - epoch) / 1000);
   if (diff < 60) return `${diff}秒前`;

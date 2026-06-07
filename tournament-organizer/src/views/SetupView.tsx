@@ -61,7 +61,7 @@ export const SetupView: React.FC = () => {
       hasThirdPlace: thirdPlace,
       participants,
       matches,
-      announcements: [],
+      events: [],
       createdAt: Date.now(),
     };
     dispatch({ type: 'CREATE', tournament: t });

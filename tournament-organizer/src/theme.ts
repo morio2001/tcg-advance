@@ -30,6 +30,25 @@ export const STATUS_META: Record<string, { label: string; color: string; bg: str
   void: { label: '不戦', color: '#aab2bf', bg: '#f0f2f5' },
 };
 
+export const APPEARANCE_META: Record<string, { label: string; color: string }> = {
+  ok: { label: '可', color: '#1f9d57' },
+  ng: { label: '不可', color: '#d81e3f' },
+  pending: { label: '未', color: '#98a2b3' },
+};
+
+// Activity-log event kind -> short label + accent color (for feed/thread chips).
+export const KIND_META: Record<string, { label: string; color: string }> = {
+  announcement: { label: 'お知らせ', color: '#1769d6' },
+  status: { label: '進行', color: '#0f9d6b' },
+  result: { label: '結果', color: '#d81e3f' },
+  extension: { label: '延長', color: '#e8590c' },
+  penalty: { label: 'ペナルティ', color: '#c77700' },
+  stream: { label: '配信', color: '#c81d8f' },
+  table: { label: '卓', color: '#5b6675' },
+  appearance: { label: 'アピアランス', color: '#7a5af0' },
+  message: { label: 'コメント', color: '#5b6675' },
+};
+
 export const PENALTY_META: Record<string, { label: string; short: string; color: string }> = {
   caution: { label: '注意 (Caution)', short: '注意', color: '#2f86c2' },
   warning: { label: '警告 (Warning)', short: '警告', color: '#c77700' },
