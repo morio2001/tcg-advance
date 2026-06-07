@@ -173,7 +173,7 @@ export const MatchDetailModal: React.FC<Props> = ({ match: m, t, now, onClose })
                       fontWeight: 700,
                       fontSize: 13,
                       border: `2px solid ${sel ? '#ff4d63' : C.border}`,
-                      background: sel ? 'rgba(255,77,99,0.16)' : 'rgba(255,255,255,0.04)',
+                      background: sel ? 'rgba(255,77,99,0.16)' : 'rgba(0,0,0,0.04)',
                       color: sel ? '#ff4d63' : C.text,
                     }}
                   >
@@ -260,7 +260,7 @@ export const MatchDetailModal: React.FC<Props> = ({ match: m, t, now, onClose })
                   fontSize: 11,
                   fontWeight: 700,
                   border: `1px solid ${penTarget === opt.id ? C.accent : C.border}`,
-                  background: penTarget === opt.id ? 'rgba(0,224,224,0.12)' : 'transparent',
+                  background: penTarget === opt.id ? 'rgba(23,105,214,0.12)' : 'transparent',
                   color: penTarget === opt.id ? C.accent : C.textDim,
                 }}
               >

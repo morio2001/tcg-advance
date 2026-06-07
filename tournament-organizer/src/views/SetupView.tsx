@@ -140,7 +140,7 @@ export const SetupView: React.FC = () => {
         {participants.length > 0 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px,1fr))', gap: 6, marginBottom: 16, maxHeight: 180, overflowY: 'auto' }}>
             {participants.map((p) => (
-              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '4px 8px', background: 'rgba(255,255,255,0.03)', borderRadius: 6 }}>
+              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '4px 8px', background: 'rgba(0,0,0,0.03)', borderRadius: 6 }}>
                 <span style={{ color: C.textFaint, fontWeight: 800, width: 18 }}>{p.seed}</span>
                 <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
               </div>

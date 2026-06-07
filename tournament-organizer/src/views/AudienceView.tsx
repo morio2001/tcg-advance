@@ -10,7 +10,7 @@ import { AnnouncementsPanel } from './AnnouncementsPanel';
 import { Bracket } from './Bracket';
 
 const Note: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div style={{ fontSize: 11.5, color: C.textFaint, padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 8, marginBottom: 14, border: `1px dashed ${C.border}` }}>
+  <div style={{ fontSize: 11.5, color: C.textFaint, padding: '8px 12px', background: 'rgba(0,0,0,0.03)', borderRadius: 8, marginBottom: 14, border: `1px dashed ${C.border}` }}>
     {children}
   </div>
 );
@@ -55,7 +55,7 @@ export const AudienceView: React.FC<{ t: Tournament; role: Role }> = ({ t, role 
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     {[pa, pb].map((p, i) => (
-                      <div key={i} style={{ flex: 1, padding: 10, borderRadius: 9, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}` }}>
+                      <div key={i} style={{ flex: 1, padding: 10, borderRadius: 9, background: 'rgba(0,0,0,0.03)', border: `1px solid ${C.border}` }}>
                         <div style={{ fontSize: 10, color: C.textFaint }}>SEED {p?.seed ?? '–'}</div>
                         <div style={{ fontSize: 15, fontWeight: 800 }}>{p?.name ?? '未定'}</div>
                         <div style={{ fontSize: 12, color: C.accent }}>{p?.deck ?? ''}</div>
@@ -185,7 +185,7 @@ const TableChip: React.FC<{ label: string; active: boolean; onClick: () => void 
       fontSize: 12,
       fontWeight: 700,
       border: `1px solid ${active ? C.accent : C.border}`,
-      background: active ? 'rgba(0,224,224,0.12)' : 'transparent',
+      background: active ? 'rgba(23,105,214,0.12)' : 'transparent',
       color: active ? C.accent : C.textDim,
     }}
   >

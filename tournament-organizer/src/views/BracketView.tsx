@@ -18,7 +18,7 @@ export const BracketView: React.FC<{ t: Tournament }> = ({ t }) => {
       <div
         style={{
           overflowX: 'auto',
-          background: 'radial-gradient(circle at 30% 0%, rgba(0,224,224,0.05), transparent 60%)',
+          background: '#f4f6fa',
           border: `1px solid ${C.border}`,
           borderRadius: 14,
           minHeight: 480,

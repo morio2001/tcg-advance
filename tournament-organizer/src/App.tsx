@@ -42,9 +42,10 @@ const Shell: React.FC = () => {
           position: 'sticky',
           top: 0,
           zIndex: 50,
-          background: 'rgba(7,11,22,0.92)',
+          background: 'rgba(255,255,255,0.92)',
           backdropFilter: 'blur(10px)',
           borderBottom: `1px solid ${C.border}`,
+          boxShadow: '0 1px 3px rgba(16,24,40,0.05)',
           padding: '10px 20px',
         }}
       >
@@ -64,7 +65,7 @@ const Shell: React.FC = () => {
           {/* role switcher */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ fontSize: 11, color: C.textFaint }}>表示:</span>
-            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 3, gap: 2 }}>
+            <div style={{ display: 'flex', background: 'rgba(0,0,0,0.04)', borderRadius: 10, padding: 3, gap: 2 }}>
               {ROLES.map((r) => (
                 <button
                   key={r}
@@ -77,8 +78,8 @@ const Shell: React.FC = () => {
                     cursor: 'pointer',
                     fontSize: 12,
                     fontWeight: 700,
-                    background: role === r ? (r === 'admin' ? `linear-gradient(135deg, ${C.accent}, ${C.accentDeep})` : 'rgba(255,255,255,0.1)') : 'transparent',
-                    color: role === r ? (r === 'admin' ? '#04121c' : C.text) : C.textDim,
+                    background: role === r ? (r === 'admin' ? `linear-gradient(135deg, ${C.accent}, ${C.accentDeep})` : 'rgba(0,0,0,0.07)') : 'transparent',
+                    color: role === r ? (r === 'admin' ? '#fff' : C.text) : C.textDim,
                   }}
                 >
                   {ROLE_LABEL[r]}
@@ -122,7 +123,7 @@ const Shell: React.FC = () => {
                   cursor: 'pointer',
                   fontSize: 12.5,
                   fontWeight: 700,
-                  background: tab === key ? 'rgba(0,224,224,0.12)' : 'transparent',
+                  background: tab === key ? 'rgba(23,105,214,0.12)' : 'transparent',
                   color: tab === key ? C.accent : C.textDim,
                 }}
               >

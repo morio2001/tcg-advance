@@ -1,38 +1,39 @@
-// Shared visual tokens for the organizer mock.
+// Shared visual tokens for the organizer mock — light "ops board" theme.
+// Page is white-based (白基調); result reads via text color: win = red, lose = grey.
 
 export const C = {
-  bg: '#070b16',
-  panel: 'rgba(255,255,255,0.035)',
-  panelSolid: '#0f1626',
-  border: 'rgba(255,255,255,0.09)',
-  borderStrong: 'rgba(255,255,255,0.16)',
-  text: '#e6edf5',
-  textDim: '#8a99ac',
-  textFaint: '#56657a',
-  accent: '#00e0e0',
-  accentDeep: '#00a0ff',
-  win: '#00d68a',
-  lose: '#ff5a6a',
-  warn: '#ffc24a',
-  stream: '#ff5cc8',
-  live: '#34d399',
-  overtime: '#ff8c42',
+  bg: '#eceff4',
+  panel: '#ffffff',
+  panelSolid: '#ffffff',
+  border: '#d7dee8',
+  borderStrong: '#c2ccd9',
+  text: '#1b2330',
+  textDim: '#5b6675',
+  textFaint: '#98a2b3',
+  accent: '#1769d6',
+  accentDeep: '#0a52c4',
+  win: '#d81e3f',
+  lose: '#9aa3af',
+  warn: '#c77700',
+  stream: '#c81d8f',
+  live: '#1769d6',
+  overtime: '#e8590c',
 } as const;
 
-// Status -> presentation color/label
+// Status -> presentation color/label (tuned for white backgrounds)
 export const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-  pending: { label: '未確定', color: '#7e8aa0', bg: 'rgba(126,138,160,0.12)' },
-  ready: { label: '待機中', color: '#5cc8ff', bg: 'rgba(92,200,255,0.12)' },
-  live: { label: '進行中', color: '#34d399', bg: 'rgba(52,211,153,0.14)' },
-  overtime: { label: '延長中', color: '#ff8c42', bg: 'rgba(255,140,66,0.16)' },
-  done: { label: '終了', color: '#9aa6b8', bg: 'rgba(154,166,184,0.1)' },
-  void: { label: '不戦', color: '#56657a', bg: 'rgba(86,101,122,0.1)' },
+  pending: { label: '未確定', color: '#8a93a3', bg: '#eef1f5' },
+  ready: { label: '待機中', color: '#2f6feb', bg: '#eaf1ff' },
+  live: { label: '進行中', color: '#1769d6', bg: '#e7f0ff' },
+  overtime: { label: '延長中', color: '#e8590c', bg: '#fff0e6' },
+  done: { label: '終了', color: '#8a93a3', bg: '#eef1f5' },
+  void: { label: '不戦', color: '#aab2bf', bg: '#f0f2f5' },
 };
 
 export const PENALTY_META: Record<string, { label: string; short: string; color: string }> = {
-  caution: { label: '注意 (Caution)', short: '注意', color: '#8ad6ff' },
-  warning: { label: '警告 (Warning)', short: '警告', color: '#ffc24a' },
-  game_loss: { label: 'ゲームロス', short: 'GL', color: '#ff9a3c' },
-  match_loss: { label: 'マッチロス', short: 'ML', color: '#ff5a6a' },
-  dq: { label: '失格 (DQ)', short: 'DQ', color: '#ff3b5c' },
+  caution: { label: '注意 (Caution)', short: '注意', color: '#2f86c2' },
+  warning: { label: '警告 (Warning)', short: '警告', color: '#c77700' },
+  game_loss: { label: 'ゲームロス', short: 'GL', color: '#e8590c' },
+  match_loss: { label: 'マッチロス', short: 'ML', color: '#d81e3f' },
+  dq: { label: '失格 (DQ)', short: 'DQ', color: '#c01030' },
 };

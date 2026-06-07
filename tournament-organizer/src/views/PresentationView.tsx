@@ -43,7 +43,7 @@ export const PresentationView: React.FC<{ t: Tournament; onExit: () => void }> =
         position: 'fixed',
         inset: 0,
         zIndex: 200,
-        background: 'radial-gradient(circle at 50% -10%, #0d2540, #060912 60%)',
+        background: 'radial-gradient(circle at 50% -10%, #ffffff, #e7ecf3 70%)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -95,12 +95,12 @@ export const PresentationView: React.FC<{ t: Tournament; onExit: () => void }> =
 
       {/* bracket */}
       <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-        <Bracket t={t} now={now} scale={1.3} />
+        <Bracket t={t} now={now} scale={1.25} />
       </div>
 
       {/* ticker */}
       {pinned.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 28px', borderTop: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.3)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 28px', borderTop: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.04)' }}>
           <span style={{ fontSize: 12, fontWeight: 800, color: C.accent, flexShrink: 0 }}>
             <Icon d={ICONS.bullhorn} size={13} color={C.accent} /> お知らせ
           </span>

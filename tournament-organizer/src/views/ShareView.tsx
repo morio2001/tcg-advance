@@ -91,7 +91,7 @@ export const ShareView: React.FC<{ t: Tournament }> = ({ t }) => {
               fontSize: 12,
               fontWeight: 700,
               border: `1px solid ${aud === tab.key ? C.accent : C.border}`,
-              background: aud === tab.key ? 'rgba(0,224,224,0.12)' : 'transparent',
+              background: aud === tab.key ? 'rgba(23,105,214,0.12)' : 'transparent',
               color: aud === tab.key ? C.accent : C.textDim,
             }}
           >

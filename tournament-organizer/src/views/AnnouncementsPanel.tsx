@@ -71,7 +71,7 @@ export const AnnouncementsPanel: React.FC<{ t: Tournament; now: number; editable
                     fontSize: 11,
                     fontWeight: 700,
                     border: `1px solid ${on ? C.accent : C.border}`,
-                    background: on ? 'rgba(0,224,224,0.12)' : 'transparent',
+                    background: on ? 'rgba(23,105,214,0.12)' : 'transparent',
                     color: on ? C.accent : C.textDim,
                   }}
                 >
@@ -95,7 +95,7 @@ export const AnnouncementsPanel: React.FC<{ t: Tournament; now: number; editable
             style={{
               padding: '9px 11px',
               borderRadius: 10,
-              background: a.pinned ? 'rgba(0,224,224,0.07)' : 'rgba(255,255,255,0.03)',
+              background: a.pinned ? 'rgba(23,105,214,0.07)' : 'rgba(0,0,0,0.03)',
               border: `1px solid ${a.pinned ? `${C.accent}44` : C.border}`,
             }}
           >

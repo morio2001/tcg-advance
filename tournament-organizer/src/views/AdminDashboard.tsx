@@ -116,7 +116,7 @@ export const AdminDashboard: React.FC<{ t: Tournament }> = ({ t }) => {
                 fontSize: 12,
                 fontWeight: 700,
                 border: `1px solid ${filter === f ? C.accent : C.border}`,
-                background: filter === f ? 'rgba(0,224,224,0.12)' : 'transparent',
+                background: filter === f ? 'rgba(23,105,214,0.12)' : 'transparent',
                 color: filter === f ? C.accent : C.textDim,
               }}
             >
@@ -130,7 +130,7 @@ export const AdminDashboard: React.FC<{ t: Tournament }> = ({ t }) => {
           <div key={r} style={{ marginBottom: 18 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <span style={{ fontSize: 13, fontWeight: 800, color: r === cur ? C.accent : C.textDim }}>{roundName(t, r)}</span>
-              {r === cur && !champ && <span style={{ fontSize: 10, color: C.accent, background: 'rgba(0,224,224,0.12)', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>現在</span>}
+              {r === cur && !champ && <span style={{ fontSize: 10, color: C.accent, background: 'rgba(23,105,214,0.12)', padding: '2px 7px', borderRadius: 6, fontWeight: 700 }}>現在</span>}
               <span style={{ fontSize: 11, color: C.textFaint }}>{matches.length}試合</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>

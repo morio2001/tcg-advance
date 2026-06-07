@@ -5,10 +5,10 @@ import type { MatchStatus } from '../types';
 type Variant = 'primary' | 'ghost' | 'danger' | 'warn' | 'subtle';
 
 const variantStyle: Record<Variant, React.CSSProperties> = {
-  primary: { background: `linear-gradient(135deg, ${C.accent}, ${C.accentDeep})`, color: '#04121c', border: 'none' },
-  warn: { background: `linear-gradient(135deg, ${C.warn}, #ff9a3c)`, color: '#1a1200', border: 'none' },
-  danger: { background: 'rgba(255,90,106,0.14)', color: C.lose, border: `1px solid rgba(255,90,106,0.4)` },
-  ghost: { background: 'rgba(255,255,255,0.05)', color: C.text, border: `1px solid ${C.border}` },
+  primary: { background: `linear-gradient(135deg, ${C.accent}, ${C.accentDeep})`, color: '#fff', border: 'none' },
+  warn: { background: `linear-gradient(135deg, #f0a020, ${C.overtime})`, color: '#fff', border: 'none' },
+  danger: { background: '#fdecee', color: C.win, border: `1px solid #f3c2c8` },
+  ghost: { background: 'rgba(0,0,0,0.05)', color: C.text, border: `1px solid ${C.border}` },
   subtle: { background: 'transparent', color: C.textDim, border: `1px solid ${C.border}` },
 };
 
@@ -40,6 +40,7 @@ export const Card: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ style, ..
       background: C.panel,
       border: `1px solid ${C.border}`,
       borderRadius: 14,
+      boxShadow: '0 1px 2px rgba(16,24,40,0.05)',
       ...style,
     }}
   />
@@ -117,8 +118,8 @@ export const Modal: React.FC<{ open: boolean; onClose: () => void; children: Rea
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(2,5,12,0.72)',
-        backdropFilter: 'blur(4px)',
+        background: 'rgba(20,28,40,0.45)',
+        backdropFilter: 'blur(3px)',
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
@@ -159,7 +160,7 @@ export const Field: React.FC<{ label: string; children: React.ReactNode; hint?: 
 
 const inputBase: React.CSSProperties = {
   width: '100%',
-  background: 'rgba(255,255,255,0.05)',
+  background: '#f7f9fc',
   border: `1px solid ${C.border}`,
   borderRadius: 9,
   color: C.text,

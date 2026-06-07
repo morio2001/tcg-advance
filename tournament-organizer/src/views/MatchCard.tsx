@@ -162,7 +162,7 @@ export const MatchCard: React.FC<Props> = ({ match: m, t, now, onClick }) => {
 
       {/* done: cover the whole card with a light grey wash */}
       {done && (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(150,160,175,0.28)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(108,120,138,0.52)', pointerEvents: 'none' }} />
       )}
     </div>
   );
