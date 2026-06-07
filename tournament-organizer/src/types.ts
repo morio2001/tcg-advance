@@ -36,6 +36,7 @@ export interface Participant {
   deck?: string;       // archetype, used for broadcast lower-thirds
   affiliation?: string; // shop / region / team
   appearance: Appearance; // pre-stream appearance check, managed in the roster
+  photo?: string;      // data URL (downscaled), registered in the roster
 }
 
 export interface Penalty {

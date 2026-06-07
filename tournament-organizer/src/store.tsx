@@ -30,7 +30,7 @@ type Action =
   | { type: 'ADD_PENALTY'; matchId: string; penalty: Penalty }
   | { type: 'REMOVE_PENALTY'; matchId: string; penaltyId: string }
   | { type: 'SET_APPEARANCE'; participantId: string; value: Appearance }
-  | { type: 'UPDATE_PARTICIPANT'; participantId: string; patch: Partial<{ name: string; deck: string; affiliation: string }> }
+  | { type: 'UPDATE_PARTICIPANT'; participantId: string; patch: Partial<{ name: string; deck: string; affiliation: string; photo: string }> }
   | { type: 'ADD_ANNOUNCEMENT'; body: string; audiences: Role[] }
   | { type: 'POST_MESSAGE'; matchId: string | null; body: string }
   | { type: 'TOGGLE_PIN'; eventId: string }

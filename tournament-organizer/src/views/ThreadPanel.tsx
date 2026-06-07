@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { ActivityEvent, Match, PenaltyType, Role, Tournament } from '../types';
 import { C, KIND_META, PENALTY_META } from '../theme';
 import { ROLE_COLOR, ROLE_LABEL, ROLES } from '../roles';
@@ -207,118 +207,151 @@ const SOURCE_FILTERS: (Role | 'all')[] = ['all', 'admin', 'broadcast', 'floor', 
 
 /* ---------------- main panel ---------------- */
 
+const TabButton: React.FC<{ active: boolean; onClick: () => void; children: React.ReactNode }> = ({ active, onClick, children }) => (
+  <button
+    onClick={onClick}
+    style={{
+      flex: 1,
+      padding: '10px 8px',
+      border: 'none',
+      cursor: 'pointer',
+      background: 'none',
+      fontSize: 12.5,
+      fontWeight: 800,
+      color: active ? C.accent : C.textDim,
+      borderBottom: `2px solid ${active ? C.accent : 'transparent'}`,
+    }}
+  >
+    {children}
+  </button>
+);
+
 export const ThreadPanel: React.FC<{ t: Tournament; now: number }> = ({ t, now }) => {
   const { state, dispatch } = useStore();
   const selId = state.selectedMatchId;
   const selected = selId ? t.matches.find((m) => m.id === selId) ?? null : null;
 
+  const [tab, setTab] = useState<'activity' | 'match'>('activity');
   const [srcFilter, setSrcFilter] = useState<Role | 'all'>('all');
   const [mode, setMode] = useState<'message' | 'announce'>('message');
   const [text, setText] = useState('');
+  const [matchText, setMatchText] = useState('');
   const [aud, setAud] = useState<Role[]>(['floor', 'broadcast', 'stage']);
+
+  // selecting a card on the bracket jumps to the match tab
+  useEffect(() => {
+    if (selId) setTab('match');
+  }, [selId]);
 
   const pa = selected ? participant(t, selected.slots[0].participantId) : null;
   const pb = selected ? participant(t, selected.slots[1].participantId) : null;
 
-  let feed = [...t.events].sort((a, b) => b.at - a.at);
-  if (selected) feed = feed.filter((e) => e.matchId === selected.id);
-  else if (srcFilter !== 'all') feed = feed.filter((e) => e.source.role === srcFilter);
+  const sorted = [...t.events].sort((a, b) => b.at - a.at);
+  const activityFeed = srcFilter === 'all' ? sorted : sorted.filter((e) => e.source.role === srcFilter);
+  const matchFeed = selected ? sorted.filter((e) => e.matchId === selected.id) : [];
 
-  const post = () => {
+  const openMatch = (id: string) => dispatch({ type: 'SELECT_MATCH', matchId: id });
+
+  const postActivity = () => {
     const body = text.trim();
     if (!body) return;
-    if (selected) dispatch({ type: 'POST_MESSAGE', matchId: selected.id, body });
-    else if (mode === 'announce') dispatch({ type: 'ADD_ANNOUNCEMENT', body, audiences: aud });
+    if (mode === 'announce') dispatch({ type: 'ADD_ANNOUNCEMENT', body, audiences: aud });
     else dispatch({ type: 'POST_MESSAGE', matchId: null, body });
     setText('');
   };
+  const postMatch = () => {
+    const body = matchText.trim();
+    if (!body || !selected) return;
+    dispatch({ type: 'POST_MESSAGE', matchId: selected.id, body });
+    setMatchText('');
+  };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 224px)', minHeight: 420, background: '#fff', border: `1px solid ${C.border}`, borderRadius: 14, boxShadow: '0 1px 2px rgba(16,24,40,0.05)' }}>
-      {/* header */}
-      <div style={{ padding: '12px 14px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-        {selected ? (
-          <>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 800 }}>{selected.table ? `卓${selected.table} ` : ''}{selected.label}</div>
-              <div style={{ fontSize: 11, color: C.textDim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {pa ? pa.name : slotName(selected.slots[0], t)} vs {pb ? pb.name : slotName(selected.slots[1], t)}
-              </div>
-            </div>
-            <Button variant="subtle" size="sm" onClick={() => dispatch({ type: 'SELECT_MATCH', matchId: null })}>
-              <Icon d={ICONS.back} size={12} /> 全体へ
-            </Button>
-          </>
-        ) : (
-          <>
-            <Icon d={ICONS.bullhorn} size={16} color={C.accent} />
-            <span style={{ fontSize: 14, fontWeight: 800 }}>アクティビティ</span>
-            <span style={{ fontSize: 11, color: C.textFaint }}>全イベントの共有ログ</span>
-          </>
-        )}
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 224px)', minHeight: 420, background: '#fff', border: `1px solid ${C.border}`, borderRadius: 14, boxShadow: '0 1px 2px rgba(16,24,40,0.05)', overflow: 'hidden' }}>
+      {/* tabs */}
+      <div style={{ display: 'flex', borderBottom: `1px solid ${C.border}` }}>
+        <TabButton active={tab === 'activity'} onClick={() => setTab('activity')}>アクティビティ</TabButton>
+        <TabButton active={tab === 'match'} onClick={() => setTab('match')}>
+          試合カード{selected ? ` ・ ${selected.table ? `卓${selected.table}` : selected.label}` : ''}
+        </TabButton>
       </div>
 
-      {/* controls when a match is selected */}
-      {selected && (
-        <div style={{ padding: '0 14px', maxHeight: '48%', overflowY: 'auto', borderBottom: `1px solid ${C.border}` }}>
-          <MatchControls key={selected.id} m={selected} t={t} now={now} />
-        </div>
-      )}
-
-      {/* source filter when global */}
-      {!selected && (
-        <div style={{ display: 'flex', gap: 5, padding: '8px 14px', flexWrap: 'wrap', borderBottom: `1px solid ${C.border}` }}>
-          {SOURCE_FILTERS.map((s) => (
-            <button key={s} onClick={() => setSrcFilter(s)} style={{ padding: '4px 10px', borderRadius: 999, cursor: 'pointer', fontSize: 11, fontWeight: 700, border: `1px solid ${srcFilter === s ? C.accent : C.border}`, background: srcFilter === s ? 'rgba(23,105,214,0.1)' : 'transparent', color: srcFilter === s ? C.accent : C.textDim }}>
-              {s === 'all' ? 'すべて' : ROLE_LABEL[s]}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* feed */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '4px 14px' }}>
-        {feed.length === 0 && <div style={{ padding: 20, textAlign: 'center', color: C.textFaint, fontSize: 12 }}>イベントはありません。</div>}
-        {feed.map((e) => (
-          <EventItem key={e.id} e={e} t={t} now={now} editable onOpenMatch={(id) => dispatch({ type: 'SELECT_MATCH', matchId: id })} />
-        ))}
-      </div>
-
-      {/* composer */}
-      <div style={{ padding: '10px 14px', borderTop: `1px solid ${C.border}` }}>
-        {!selected && (
-          <div style={{ display: 'flex', gap: 5, marginBottom: 6 }}>
-            {(['message', 'announce'] as const).map((md) => (
-              <button key={md} onClick={() => setMode(md)} style={{ padding: '3px 10px', borderRadius: 999, cursor: 'pointer', fontSize: 11, fontWeight: 700, border: `1px solid ${mode === md ? C.accent : C.border}`, background: mode === md ? 'rgba(23,105,214,0.1)' : 'transparent', color: mode === md ? C.accent : C.textDim }}>
-                {md === 'message' ? 'コメント' : 'お知らせ'}
+      {tab === 'activity' ? (
+        <>
+          {/* source filter */}
+          <div style={{ display: 'flex', gap: 5, padding: '8px 14px', flexWrap: 'wrap', borderBottom: `1px solid ${C.border}` }}>
+            {SOURCE_FILTERS.map((s) => (
+              <button key={s} onClick={() => setSrcFilter(s)} style={{ padding: '4px 10px', borderRadius: 999, cursor: 'pointer', fontSize: 11, fontWeight: 700, border: `1px solid ${srcFilter === s ? C.accent : C.border}`, background: srcFilter === s ? 'rgba(23,105,214,0.1)' : 'transparent', color: srcFilter === s ? C.accent : C.textDim }}>
+                {s === 'all' ? 'すべて' : ROLE_LABEL[s]}
               </button>
             ))}
           </div>
-        )}
-        {!selected && mode === 'announce' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 10, color: C.textDim }}>共有先:</span>
-            {ROLES.filter((r) => r !== 'admin').map((r) => {
-              const on = aud.includes(r);
-              return (
-                <button key={r} onClick={() => setAud((p) => (on ? p.filter((x) => x !== r) : [...p, r]))} style={{ padding: '2px 8px', borderRadius: 7, cursor: 'pointer', fontSize: 10, fontWeight: 700, border: `1px solid ${on ? C.accent : C.border}`, background: on ? 'rgba(23,105,214,0.1)' : 'transparent', color: on ? C.accent : C.textDim }}>
-                  {ROLE_LABEL[r]}
-                </button>
-              );
-            })}
+          {/* feed */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '4px 14px' }}>
+            {activityFeed.length === 0 && <div style={{ padding: 20, textAlign: 'center', color: C.textFaint, fontSize: 12 }}>イベントはありません。</div>}
+            {activityFeed.map((e) => (
+              <EventItem key={e.id} e={e} t={t} now={now} editable onOpenMatch={openMatch} />
+            ))}
           </div>
-        )}
-        <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
-          <TextArea
-            rows={2}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={selected ? 'この試合のスレッドに投稿…' : mode === 'announce' ? '各所へのお知らせ…' : 'コメントを投稿…'}
-            style={{ flex: 1 }}
-          />
-          <Button variant="primary" size="sm" onClick={post}>投稿</Button>
+          {/* composer */}
+          <div style={{ padding: '10px 14px', borderTop: `1px solid ${C.border}` }}>
+            <div style={{ display: 'flex', gap: 5, marginBottom: 6 }}>
+              {(['message', 'announce'] as const).map((md) => (
+                <button key={md} onClick={() => setMode(md)} style={{ padding: '3px 10px', borderRadius: 999, cursor: 'pointer', fontSize: 11, fontWeight: 700, border: `1px solid ${mode === md ? C.accent : C.border}`, background: mode === md ? 'rgba(23,105,214,0.1)' : 'transparent', color: mode === md ? C.accent : C.textDim }}>
+                  {md === 'message' ? 'コメント' : 'お知らせ'}
+                </button>
+              ))}
+            </div>
+            {mode === 'announce' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 10, color: C.textDim }}>共有先:</span>
+                {ROLES.filter((r) => r !== 'admin').map((r) => {
+                  const on = aud.includes(r);
+                  return (
+                    <button key={r} onClick={() => setAud((p) => (on ? p.filter((x) => x !== r) : [...p, r]))} style={{ padding: '2px 8px', borderRadius: 7, cursor: 'pointer', fontSize: 10, fontWeight: 700, border: `1px solid ${on ? C.accent : C.border}`, background: on ? 'rgba(23,105,214,0.1)' : 'transparent', color: on ? C.accent : C.textDim }}>
+                      {ROLE_LABEL[r]}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
+              <TextArea rows={2} value={text} onChange={(e) => setText(e.target.value)} placeholder={mode === 'announce' ? '各所へのお知らせ…' : 'コメントを投稿…'} style={{ flex: 1 }} />
+              <Button variant="primary" size="sm" onClick={postActivity}>投稿</Button>
+            </div>
+          </div>
+        </>
+      ) : selected ? (
+        <>
+          {/* match header */}
+          <div style={{ padding: '10px 14px', borderBottom: `1px solid ${C.border}` }}>
+            <div style={{ fontSize: 14, fontWeight: 800 }}>{selected.table ? `卓${selected.table} ` : ''}{selected.label}</div>
+            <div style={{ fontSize: 11, color: C.textDim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {pa ? pa.name : slotName(selected.slots[0], t)} vs {pb ? pb.name : slotName(selected.slots[1], t)}
+            </div>
+          </div>
+          {/* controls + thread (scroll) */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0 14px' }}>
+            <MatchControls key={selected.id} m={selected} t={t} now={now} />
+            <div style={{ padding: '10px 0', borderTop: `1px solid ${C.border}` }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: C.textDim, marginBottom: 4 }}>スレッド</div>
+              {matchFeed.length === 0 && <div style={{ padding: '12px 0', color: C.textFaint, fontSize: 12 }}>この試合に紐づくイベントはまだありません。</div>}
+              {matchFeed.map((e) => (
+                <EventItem key={e.id} e={e} t={t} now={now} editable onOpenMatch={openMatch} />
+              ))}
+            </div>
+          </div>
+          {/* composer */}
+          <div style={{ padding: '10px 14px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 6, alignItems: 'flex-end' }}>
+            <TextArea rows={2} value={matchText} onChange={(e) => setMatchText(e.target.value)} placeholder="この試合のスレッドに投稿…" style={{ flex: 1 }} />
+            <Button variant="primary" size="sm" onClick={postMatch}>投稿</Button>
+          </div>
+        </>
+      ) : (
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center', color: C.textFaint, fontSize: 13 }}>
+          ブラケットから試合を選ぶと、ここに操作とスレッドが表示されます。
         </div>
-      </div>
+      )}
     </div>
   );
 };

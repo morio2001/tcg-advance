@@ -58,6 +58,9 @@ const PlayerRow: React.FC<{ m: Match; t: Tournament; side: 'a' | 'b' }> = ({ m, 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 8px' }}>
       <span style={{ fontSize: 10, fontWeight: 800, color: L.faint, width: 16, textAlign: 'center', flexShrink: 0 }}>{p ? p.seed : '–'}</span>
+      {p?.photo && (
+        <span style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, background: `center/cover no-repeat url(${p.photo})`, border: `1px solid ${L.border}` }} />
+      )}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <span style={{ fontSize: 13.5, fontWeight: isWinner ? 800 : 600, color: nameColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
