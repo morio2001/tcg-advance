@@ -22,12 +22,11 @@ const NAMES: [string, string, string, Appearance][] = [
 ];
 
 function buildParticipants(): Participant[] {
-  return NAMES.map(([name, deck, affiliation, appearance], i) => ({
+  return NAMES.map(([name, deck, , appearance], i) => ({
     id: `seed${i + 1}`,
     name,
     seed: i + 1,
     deck,
-    affiliation,
     appearance,
     photo: SAMURAI_AVATARS[i], // first 5 players get sample portraits
   }));

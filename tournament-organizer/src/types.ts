@@ -34,7 +34,7 @@ export interface Participant {
   name: string;
   seed: number;        // 1-based seed
   deck?: string;       // archetype, used for broadcast lower-thirds
-  affiliation?: string; // shop / region / team
+  note?: string;       // 備考 (free-form notes)
   appearance: Appearance; // pre-stream appearance check, managed in the roster
   photo?: string;      // data URL (downscaled), registered in the roster
 }

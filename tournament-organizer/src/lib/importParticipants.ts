@@ -8,13 +8,13 @@ const newId = () => `p_${Date.now().toString(36)}_${(pid++).toString(36)}`;
 export interface ParsedRow {
   name: string;
   deck?: string;
-  affiliation?: string;
+  note?: string;
 }
 
 /**
  * Parse pasted text. Accepts:
  *  - one name per line
- *  - CSV / TSV with optional header (name, deck, affiliation / 名前, デッキ, 所属)
+ *  - CSV / TSV with optional header (name, deck, note / 名前, デッキ, 備考)
  */
 export function parsePasted(text: string): ParsedRow[] {
   const lines = text
@@ -31,21 +31,21 @@ export function parsePasted(text: string): ParsedRow[] {
 
   const split = (l: string) => l.split(delim).map((c) => c.trim());
   let startIdx = 0;
-  let cols = { name: 0, deck: 1, affiliation: 2 };
+  let cols = { name: 0, deck: 1, note: 2 };
   const header = split(lines[0]).map((h) => h.toLowerCase());
   const looksLikeHeader = header.some((h) =>
-    ['name', '名前', 'player', 'プレイヤー', '選手', 'deck', 'デッキ', '所属', 'team', 'shop'].includes(h),
+    ['name', '名前', 'player', 'プレイヤー', '選手', 'deck', 'デッキ', '備考', 'note', 'memo'].includes(h),
   );
   if (looksLikeHeader) {
     startIdx = 1;
     const find = (keys: string[]) => header.findIndex((h) => keys.includes(h));
     const nameIdx = find(['name', '名前', 'player', 'プレイヤー', '選手']);
     const deckIdx = find(['deck', 'デッキ', 'archetype']);
-    const affIdx = find(['affiliation', '所属', 'team', 'shop', 'チーム', '店舗']);
+    const noteIdx = find(['備考', 'note', 'memo', 'remarks', 'メモ']);
     cols = {
       name: nameIdx >= 0 ? nameIdx : 0,
       deck: deckIdx >= 0 ? deckIdx : 1,
-      affiliation: affIdx >= 0 ? affIdx : 2,
+      note: noteIdx >= 0 ? noteIdx : 2,
     };
   }
 
@@ -57,7 +57,7 @@ export function parsePasted(text: string): ParsedRow[] {
     rows.push({
       name,
       deck: c[cols.deck]?.trim() || undefined,
-      affiliation: c[cols.affiliation]?.trim() || undefined,
+      note: c[cols.note]?.trim() || undefined,
     });
   }
   return rows;
@@ -79,7 +79,7 @@ export function toParticipants(rows: ParsedRow[]): Participant[] {
     name: r.name,
     seed: i + 1,
     deck: r.deck,
-    affiliation: r.affiliation,
+    note: r.note,
     appearance: 'pending' as const,
   }));
 }

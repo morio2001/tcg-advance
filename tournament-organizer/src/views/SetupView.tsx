@@ -31,7 +31,7 @@ export const SetupView: React.FC = () => {
     try {
       const rows = await parseFile(file);
       const text = rows
-        .map((r) => [r.name, r.deck, r.affiliation].filter(Boolean).join(','))
+        .map((r) => [r.name, r.deck, r.note].filter(Boolean).join(','))
         .join('\n');
       setRaw(text);
       setParticipants(toParticipants(rows));
@@ -109,7 +109,7 @@ export const SetupView: React.FC = () => {
 
         <Field
           label="参加者インポート"
-          hint="1行1名、または「名前,デッキ,所属」のCSV / TSV。並び順がシード順になります。"
+          hint="1行1名、または「名前,デッキ,備考」のCSV / TSV。並び順がシード順になります。"
         >
           <TextArea
             rows={6}

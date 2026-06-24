@@ -85,7 +85,7 @@ export const RosterView: React.FC<{ t: Tournament }> = ({ t }) => {
           <span style={{ width: 48 }}>写真</span>
           <span style={{ flex: 1 }}>選手名</span>
           <span style={{ flex: 1 }}>デッキ</span>
-          <span style={{ width: 110 }}>所属</span>
+          <span style={{ width: 160 }}>備考</span>
           <span style={{ width: 150, textAlign: 'center' }}>アピアランス</span>
         </div>
         {players.map((p) => (
@@ -94,7 +94,7 @@ export const RosterView: React.FC<{ t: Tournament }> = ({ t }) => {
             <PhotoCell p={p} />
             <input value={p.name} onChange={(e) => dispatch({ type: 'UPDATE_PARTICIPANT', participantId: p.id, patch: { name: e.target.value } })} style={inputCell(true)} />
             <input value={p.deck ?? ''} placeholder="—" onChange={(e) => dispatch({ type: 'UPDATE_PARTICIPANT', participantId: p.id, patch: { deck: e.target.value } })} style={inputCell(false)} />
-            <input value={p.affiliation ?? ''} placeholder="—" onChange={(e) => dispatch({ type: 'UPDATE_PARTICIPANT', participantId: p.id, patch: { affiliation: e.target.value } })} style={{ ...inputCell(false), width: 110, flex: 'none' }} />
+            <input value={p.note ?? ''} placeholder="—" onChange={(e) => dispatch({ type: 'UPDATE_PARTICIPANT', participantId: p.id, patch: { note: e.target.value } })} style={{ ...inputCell(false), width: 160, flex: 'none' }} />
             <div style={{ width: 150, display: 'flex', gap: 4, justifyContent: 'center' }}>
               {APPEARANCES.map((a) => {
                 const meta = APPEARANCE_META[a];
