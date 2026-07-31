@@ -52,3 +52,10 @@ src/
 - **Vite** — ビルドツール
 - **React 18** — UIライブラリ
 - **TypeScript** — 型安全
+
+## デザイン・モック関連
+
+- 📱 **リンク集**（デプロイURL・スクショ・管理画面）: [design/links.md](design/links.md)
+- 🎨 **スタイルガイド**（トンマナ定義）: [design/styleguide.md](design/styleguide.md)
+- `npm run dev:mock` — Supabaseなしのモックモードで起動
+- `npm run shots` — 全タブのスクショを `design/screenshots/` に書き出し

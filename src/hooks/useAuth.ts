@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { IS_MOCK_AUTH, MOCK_AUTH_USER } from '../lib/mockMode';
 import type { User, Session } from '@supabase/supabase-js';
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(IS_MOCK_AUTH ? MOCK_AUTH_USER : null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!IS_MOCK_AUTH);
 
   useEffect(() => {
+    if (IS_MOCK_AUTH) return;
+
     // 現在のセッションを取得
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);

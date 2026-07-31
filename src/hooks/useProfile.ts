@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { IS_MOCK_AUTH, MOCK_AUTH_PROFILE } from '../lib/mockMode';
 import type { User } from '@supabase/supabase-js';
 
 export interface Profile {
@@ -15,11 +16,12 @@ export interface Profile {
 }
 
 export function useProfile(user: User | null) {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(IS_MOCK_AUTH ? MOCK_AUTH_PROFILE : null);
+  const [loading, setLoading] = useState(!IS_MOCK_AUTH);
 
   // プロフィールを取得
   const fetchProfile = async () => {
+    if (IS_MOCK_AUTH) return;
     if (!user) {
       setProfile(null);
       setLoading(false);
@@ -47,6 +49,10 @@ export function useProfile(user: User | null) {
 
   // プロフィールを更新
   const updateProfile = async (updates: Partial<Pick<Profile, 'display_name' | 'favorite_shop' | 'favorite_tcg' | 'avatar_url'>>) => {
+    if (IS_MOCK_AUTH) {
+      setProfile(prev => (prev ? { ...prev, ...updates } : prev));
+      return { error: null };
+    }
     if (!user) return { error: 'ログインしていません' };
 
     const { data, error } = await supabase
